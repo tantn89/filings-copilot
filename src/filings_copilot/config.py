@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     # "openrouter": any model via OpenRouter, e.g. FILINGS_LLM_MODEL=openai/gpt-5.
     llm_provider: Literal["anthropic", "openrouter"] = "anthropic"
     llm_model: str = "claude-opus-5-5"
+    # Read here (not only by the SDK) so a single .env file configures everything.
+    anthropic_api_key: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
     openrouter_api_key: str = Field(
         default="",
         validation_alias=AliasChoices("OPENROUTER_API_KEY", "FILINGS_OPENROUTER_API_KEY"),

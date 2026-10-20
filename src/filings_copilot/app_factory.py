@@ -50,4 +50,5 @@ def _create_message(settings: Settings) -> Callable[..., Any]:
             )
         client = OpenAICompatibleMessages(settings.openrouter_api_key, settings.openrouter_base_url)
         return client.create
-    return anthropic.Anthropic().beta.messages.create
+    # None lets the SDK fall back to its own credential chain (env var, `ant` profile).
+    return anthropic.Anthropic(api_key=settings.anthropic_api_key or None).beta.messages.create
