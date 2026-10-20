@@ -1,0 +1,130 @@
+/*
+ * Design tokens. Every color, size, space, radius and duration in the UI comes from here.
+ * Direction: an analyst's ledger - warm paper, ink text, one ledger-green accent that only
+ * marks verified evidence, the primary action and focus.
+ */
+:root {
+  --hue-neutral: 95;
+  --hue-accent: 160;
+
+  --gray-0: oklch(99.5% 0.003 var(--hue-neutral));
+  --gray-50: oklch(98.2% 0.005 var(--hue-neutral));
+  --gray-100: oklch(95.8% 0.007 var(--hue-neutral));
+  --gray-200: oklch(91.5% 0.009 var(--hue-neutral));
+  --gray-300: oklch(85% 0.011 var(--hue-neutral));
+  --gray-500: oklch(54% 0.014 var(--hue-neutral));
+  --gray-600: oklch(44% 0.014 var(--hue-neutral));
+  --gray-900: oklch(21% 0.01 var(--hue-neutral));
+
+  --bg: var(--gray-50);
+  --surface: var(--gray-0);
+  --surface-sunken: var(--gray-100);
+  --border: var(--gray-200);
+  --border-strong: var(--gray-300);
+  --text: var(--gray-900);
+  --text-muted: var(--gray-600);
+  --text-subtle: var(--gray-500);
+  --accent: oklch(47% 0.1 var(--hue-accent));
+  --accent-hover: oklch(42% 0.1 var(--hue-accent));
+  --accent-soft: oklch(95.5% 0.025 var(--hue-accent));
+  --on-accent: oklch(99% 0 0);
+  --focus-ring: oklch(58% 0.12 var(--hue-accent));
+  --danger: oklch(52% 0.17 28);
+  --danger-soft: oklch(96.5% 0.02 28);
+
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 64px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  --control-h: 36px;
+  --control-h-lg: 44px;
+  --content-max: 1280px;
+  --reading-max: 68ch;
+  --panel-w: 440px;
+
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: oklch(17% 0.008 var(--hue-neutral));
+    --surface: oklch(20.5% 0.009 var(--hue-neutral));
+    --surface-sunken: oklch(15% 0.008 var(--hue-neutral));
+    --border: oklch(29% 0.01 var(--hue-neutral));
+    --border-strong: oklch(36% 0.012 var(--hue-neutral));
+    --text: oklch(94% 0.006 var(--hue-neutral));
+    --text-muted: oklch(74% 0.01 var(--hue-neutral));
+    --text-subtle: oklch(64% 0.012 var(--hue-neutral));
+    --accent: oklch(72% 0.12 var(--hue-accent));
+    --accent-hover: oklch(78% 0.11 var(--hue-accent));
+    --accent-soft: oklch(28% 0.04 var(--hue-accent));
+    --on-accent: oklch(17% 0.01 var(--hue-accent));
+    --danger: oklch(70% 0.15 28);
+    --danger-soft: oklch(27% 0.05 28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur: 0ms; }
+}
+
+@media (pointer: coarse) {
+  :root { --control-h: 44px; --control-h-lg: 48px; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: light dark; }
+
+body {
+  margin: 0;
+  font: var(--weight-regular) var(--text-base) / var(--leading-normal) var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; line-height: var(--leading-tight); }
+
+a { color: inherit; }
+
+button { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
