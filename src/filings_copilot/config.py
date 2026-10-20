@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     llm_effort: str = "medium"
     max_agent_turns: int = 8
 
+    # HTTP API. Limits protect LLM credits on a public demo; 0 disables a limit.
+    cors_origins: str = "*"
+    demo_questions_per_hour: int = 0
+    demo_daily_question_cap: int = 0
+
     chunk_size_words: int = 220
     chunk_overlap_words: int = 40
 

@@ -16,7 +16,8 @@ def make_client(tools: ToolExecutor, responses: list) -> TestClient:  # type: ig
 
 def test_health_and_companies(tools: ToolExecutor) -> None:
     client = make_client(tools, [])
-    assert client.get("/health").json() == {"status": "ok", "filings": 1, "chunks": 5}
+    assert client.get("/health").json() == {
+        "status": "ok", "filings": 1, "chunks": 5, "model": "claude-opus-5-5"}
     assert client.get("/companies").json()[0]["ticker"] == "NVDA"
 
 
