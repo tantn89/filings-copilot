@@ -127,7 +127,11 @@ filings-copilot ingest --tickers NVDA,MSFT,AAPL --years 2024-2025   # ~5 min on 
 filings-copilot ask "Why did NVIDIA's gross margin rise in FY2025, and to what level?"
 filings-copilot eval --retrieval-only                                 # free, offline
 filings-copilot serve                                                 # http://127.0.0.1:8000/docs
+
+cd web && npm install && npm run dev                                  # http://localhost:3000
 ```
+
+The UI reads the API from `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8000`).
 
 Tests run fully offline (fake Claude client, hashing embedder, mocked EDGAR, in-memory DuckDB):
 
@@ -181,7 +185,8 @@ evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
 
 ## Roadmap
 
-- [ ] Next.js chat UI with live tool trace and citation side panel
+- [x] Next.js UI (`web/`): live tool trace with the exact SQL, citation chips linked to
+      source passages and SEC.gov, shareable `/?q=` question links
 - [ ] Publish full agent eval; compare effort levels (cost vs. accuracy)
 - [ ] Query decomposition for multi-part questions (target: the TSMC miss)
 - [ ] Deploy: API on Cloud Run, UI on Vercel
