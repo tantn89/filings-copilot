@@ -2,8 +2,9 @@
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,7 +19,15 @@ class Settings(BaseSettings):
     db_path: Path = Path("data/filings.duckdb")
     embedding_model: str = "BAAI/bge-small-en-v1.5"
 
+    # "anthropic": Claude via the Anthropic SDK (credentials: ANTHROPIC_API_KEY).
+    # "openrouter": any model via OpenRouter, e.g. FILINGS_LLM_MODEL=openai/gpt-5.
+    llm_provider: Literal["anthropic", "openrouter"] = "anthropic"
     llm_model: str = "claude-opus-5-5"
+    openrouter_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("OPENROUTER_API_KEY", "FILINGS_OPENROUTER_API_KEY"),
+    )
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
     llm_effort: str = "medium"
     max_agent_turns: int = 8
 

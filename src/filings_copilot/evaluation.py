@@ -17,8 +17,8 @@ from typing import Any
 from filings_copilot.hybrid_retriever import HybridRetriever, SearchFilters
 from filings_copilot.research_agent import AgentResult, ResearchAgent
 
-# USD per million tokens for claude-opus-5-5; cache reads are cheaper, so this is an
-# upper bound when caching is active.
+# USD per million tokens for claude-opus-5-5, used when the provider does not report cost.
+# Cache reads are cheaper, so this is an upper bound when caching is active.
 PRICE_PER_MTOK = {"input": 4.00, "output": 20.00}
 
 _SCALE = {"trillion": 1e12, "t": 1e12, "billion": 1e9, "bn": 1e9, "b": 1e9,
@@ -149,6 +149,7 @@ class AgentCaseResult:
     latency_s: float
     input_tokens: int
     output_tokens: int
+    cost_usd: float
     answer: str
     tools_used: list[str] = field(default_factory=list)
 
@@ -182,6 +183,10 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         results.append(AgentCaseResult(
             id=case["id"], kind=case["kind"], passed=all(checks.values()), checks=checks,
             latency_s=r.latency_s, input_tokens=r.input_tokens, output_tokens=r.output_tokens,
+            cost_usd=r.cost_usd if r.cost_usd is not None else (
+                r.input_tokens * PRICE_PER_MTOK["input"]
+                + r.output_tokens * PRICE_PER_MTOK["output"]
+            ) / 1e6,
             answer=r.answer, tools_used=[c["name"] for c in r.tool_calls],
         ))
 
@@ -194,9 +199,7 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         return round(sum(values) / len(values), 3) if values else None
 
     latencies = sorted(r.latency_s for r in results)
-    tokens_in = sum(r.input_tokens for r in results)
-    tokens_out = sum(r.output_tokens for r in results)
-    cost = (tokens_in * PRICE_PER_MTOK["input"] + tokens_out * PRICE_PER_MTOK["output"]) / 1e6
+    cost = sum(r.cost_usd for r in results)
     return {
         "cases": len(results),
         "pass_rate": rate(lambda _: True),
@@ -207,6 +210,6 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         "abstention_accuracy": check_rate("abstained"),
         "latency_p50_s": statistics.median(latencies) if latencies else None,
         "latency_p95_s": latencies[int(0.95 * (len(latencies) - 1))] if latencies else None,
-        "avg_cost_usd_upper_bound": round(cost / max(len(results), 1), 4),
+        "avg_cost_usd": round(cost / max(len(results), 1), 4),
         "per_case": [asdict(r) for r in results],
     }

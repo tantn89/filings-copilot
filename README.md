@@ -136,6 +136,22 @@ pytest --cov=filings_copilot    # 57 tests, 86% coverage
 ruff check src tests && mypy    # strict typing
 ```
 
+## Choosing a model
+
+Claude is the default (`FILINGS_LLM_PROVIDER=anthropic`, native SDK with adaptive thinking,
+prompt caching and refusal fallback). Any other model runs through OpenRouter:
+
+```bash
+FILINGS_LLM_PROVIDER=openrouter
+FILINGS_LLM_MODEL=<provider/model from openrouter.ai/models>
+OPENROUTER_API_KEY=...
+```
+
+`openai_compatible_client.py` translates the Anthropic-shaped tool loop to chat-completions
+and back, so tools, the SQL guard and the eval harness are identical across models. That
+makes `filings-copilot eval` a like-for-like model comparison: OpenRouter reports the billed
+cost per call, which the eval report uses for cost per question.
+
 ## API
 
 | Method | Path | Returns |

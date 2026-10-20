@@ -47,6 +47,7 @@ class AgentResult:
     tool_calls: list[dict[str, Any]]
     input_tokens: int = 0
     output_tokens: int = 0
+    cost_usd: float | None = None  # billed cost when the provider reports it (OpenRouter)
     latency_s: float = 0.0
     stop_reason: str = ""
     events: list[AgentEvent] = field(default_factory=list)
@@ -91,11 +92,14 @@ class ResearchAgent:
         seen: dict[str, RetrievedChunk] = {}
         tool_calls: list[dict[str, Any]] = []
         usage = {"input_tokens": 0, "output_tokens": 0}
+        reported_costs: list[float] = []
 
         for _ in range(self.max_turns):
             response = self._request(messages)
             usage["input_tokens"] += _input_tokens(response.usage)
             usage["output_tokens"] += response.usage.output_tokens
+            if getattr(response.usage, "cost_usd", None) is not None:
+                reported_costs.append(float(response.usage.cost_usd))
             messages.append({"role": "assistant", "content": response.content})
 
             if response.stop_reason == "refusal":
@@ -113,6 +117,7 @@ class ResearchAgent:
                     "tool_calls": tool_calls,
                     "stop_reason": response.stop_reason,
                     "latency_s": round(time.perf_counter() - started, 2),
+                    "cost_usd": round(sum(reported_costs), 6) if reported_costs else None,
                     **usage,
                 })
                 return
@@ -155,6 +160,7 @@ class ResearchAgent:
             tool_calls=d["tool_calls"],
             input_tokens=d["input_tokens"],
             output_tokens=d["output_tokens"],
+            cost_usd=d["cost_usd"],
             latency_s=d["latency_s"],
             stop_reason=d["stop_reason"],
             events=events,

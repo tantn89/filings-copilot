@@ -109,7 +109,11 @@ def run_eval(
 
     settings = get_settings()
     cases = load_cases(cases_path)
-    report: dict[str, object] = {"model": settings.llm_model, "effort": settings.llm_effort}
+    report: dict[str, object] = {
+        "provider": settings.llm_provider,
+        "model": settings.llm_model,
+        "effort": settings.llm_effort,
+    }
 
     if retrieval_only:
         embedder = FastEmbedEmbedder(settings.embedding_model)
