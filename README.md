@@ -156,6 +156,14 @@ and back, so tools, the SQL guard and the eval harness are identical across mode
 makes `filings-copilot eval` a like-for-like model comparison: OpenRouter reports the billed
 cost per call, which the eval report uses for cost per question.
 
+## Deploy
+
+- **API → Hugging Face Space (Docker).** `python scripts/deploy_hf_space.py --space <user>/filings-copilot-api`
+  uploads the image source plus the pre-built DuckDB file, stores LLM keys as Space secrets,
+  and refuses to deploy without a daily question cap: every public question costs credits.
+- **UI → Vercel.** Root directory `web/`, env `NEXT_PUBLIC_API_URL=<Space URL>`; then set
+  `FILINGS_CORS_ORIGINS` to the Vercel URL and redeploy the API.
+
 ## API
 
 | Method | Path | Returns |
