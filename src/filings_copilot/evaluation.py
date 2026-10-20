@@ -213,3 +213,34 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         "avg_cost_usd": round(cost / max(len(results), 1), 4),
         "per_case": [asdict(r) for r in results],
     }
+
+
+# ---------- model comparison ----------------------------------------------------------
+
+
+def load_latest_agent_reports(results_dir: Path) -> list[dict[str, Any]]:
+    """The most recent full (agent) eval report per provider/model, oldest file first."""
+    latest: dict[tuple[str, str], dict[str, Any]] = {}
+    for path in sorted(results_dir.glob("eval-*.json")):  # timestamped names sort by time
+        report = json.loads(path.read_text(encoding="utf-8"))
+        if "agent" in report:
+            latest[(report.get("provider", "anthropic"), report["model"])] = report
+    return list(latest.values())
+
+
+def comparison_table(reports: list[dict[str, Any]]) -> str:
+    def pct(value: float | None) -> str:
+        return "n/a" if value is None else f"{100 * value:.0f}%"
+
+    rows = [
+        "| Model | Pass rate | Numeric | Citation | Abstain | p50 latency | Cost / question |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for r in sorted(reports, key=lambda r: -(r["agent"]["pass_rate"] or 0)):
+        a = r["agent"]
+        rows.append(
+            f"| {r['model']} | {pct(a['pass_rate'])} | {pct(a['numeric_accuracy'])} | "
+            f"{pct(a['citation_accuracy'])} | {pct(a['abstention_accuracy'])} | "
+            f"{a['latency_p50_s']:.1f}s | ${a['avg_cost_usd']:.4f} |"
+        )
+    return "\n".join(rows)

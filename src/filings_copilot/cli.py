@@ -97,6 +97,8 @@ def run_eval(
         bool, typer.Option(help="Score retrieval only: offline, no LLM calls, free.")
     ] = False,
     out_dir: Annotated[Path, typer.Option("--out")] = Path("evals/results"),
+    provider: Annotated[str | None, typer.Option(help="Override: anthropic | openrouter")] = None,
+    model: Annotated[str | None, typer.Option(help="Override the model id")] = None,
 ) -> None:
     """Score the system against the golden question set and save a JSON report."""
     import json
@@ -107,7 +109,8 @@ def run_eval(
     from filings_copilot.filings_store import FilingsStore
     from filings_copilot.hybrid_retriever import HybridRetriever
 
-    settings = get_settings()
+    overrides = {k: v for k, v in (("llm_provider", provider), ("llm_model", model)) if v}
+    settings = get_settings().model_copy(update=overrides)
     cases = load_cases(cases_path)
     report: dict[str, object] = {
         "provider": settings.llm_provider,
@@ -134,6 +137,16 @@ def run_eval(
             summary = {k: v for k, v in report[section].items() if k != "per_case"}  # type: ignore[attr-defined]
             typer.echo(f"{section}: {json.dumps(summary, indent=2)}")
     typer.echo(f"Report: {out}")
+
+
+@app.command("eval-report")
+def eval_report(
+    results_dir: Annotated[Path, typer.Option("--results")] = Path("evals/results"),
+) -> None:
+    """Print a markdown table comparing the latest agent eval of each model."""
+    from filings_copilot.evaluation import comparison_table, load_latest_agent_reports
+
+    typer.echo(comparison_table(load_latest_agent_reports(results_dir)))
 
 
 @app.command()

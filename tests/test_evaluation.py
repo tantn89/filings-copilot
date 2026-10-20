@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from conftest import ScriptedMessagesAPI, fake_response, text_block, tool_use_block
 from filings_copilot.agent_tools import ToolExecutor
 from filings_copilot.evaluation import (
     ExtractedNumber,
+    comparison_table,
     evaluate_agent,
     evaluate_retrieval,
     extract_numbers,
+    load_latest_agent_reports,
     number_matches,
 )
 from filings_copilot.research_agent import ResearchAgent
@@ -66,3 +71,22 @@ def test_agent_eval_grades_numbers_citations_and_abstention(tools: ToolExecutor)
     assert report["citation_accuracy"] == 1.0
     assert report["abstention_accuracy"] == 1.0
     assert report["per_case"][0]["tools_used"] == ["search_filings"]
+
+
+def test_comparison_table_uses_latest_report_per_model(tmp_path: Path) -> None:
+    def write(name: str, model: str, pass_rate: float) -> None:
+        agent = {"pass_rate": pass_rate, "numeric_accuracy": 1.0, "citation_accuracy": 0.5,
+                 "abstention_accuracy": None, "latency_p50_s": 12.34, "avg_cost_usd": 0.0123}
+        (tmp_path / name).write_text(json.dumps(
+            {"provider": "openrouter", "model": model, "agent": agent}))
+
+    write("eval-20261020-100000.json", "a/one", 0.5)
+    write("eval-20261020-110000.json", "a/one", 0.9)   # newer run of the same model wins
+    write("eval-20261020-120000.json", "b/two", 0.7)
+    retrieval_only = {"model": "x"}
+    (tmp_path / "eval-20261020-130000.json").write_text(json.dumps(retrieval_only))
+
+    table = comparison_table(load_latest_agent_reports(tmp_path)).splitlines()
+    assert len(table) == 4
+    assert table[2].startswith("| a/one | 90% | 100% | 50% | n/a | 12.3s | $0.0123 |")
+    assert table[3].startswith("| b/two | 70%")
