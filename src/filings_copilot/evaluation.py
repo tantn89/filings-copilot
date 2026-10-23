@@ -17,9 +17,15 @@ from typing import Any
 from filings_copilot.hybrid_retriever import HybridRetriever, SearchFilters
 from filings_copilot.research_agent import AgentResult, ResearchAgent
 
-# USD per million tokens for claude-opus-5-5, used when the provider does not report cost.
-# Cache reads are cheaper, so this is an upper bound when caching is active.
-PRICE_PER_MTOK = {"input": 4.00, "output": 20.00}
+# List prices in USD per million tokens: (input, output, cache read). Used when the
+# provider does not report billed cost (it does on OpenRouter). Cache writes bill at
+# 1.25x input (5-minute TTL). Unknown models get no estimate rather than a wrong one.
+PRICE_PER_MTOK: dict[str, tuple[float, float, float]] = {
+    "claude-opus-5-5": (4.00, 20.00, 0.20),
+    "claude-sonnet-5-5": (2.00, 10.00, 0.20),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01),
+}
+CACHE_WRITE_MULTIPLIER = 1.25
 
 _SCALE = {"trillion": 1e12, "t": 1e12, "billion": 1e9, "bn": 1e9, "b": 1e9,
           "million": 1e6, "mn": 1e6, "m": 1e6, "thousand": 1e3, "k": 1e3}
@@ -152,19 +158,45 @@ class AgentCaseResult:
     latency_s: float
     input_tokens: int
     output_tokens: int
-    cost_usd: float
+    cost_usd: float | None
     answer: str
     tools_used: list[str] = field(default_factory=list)
 
 
+def estimate_cost(model: str, result: AgentResult) -> float | None:
+    if result.cost_usd is not None:
+        return result.cost_usd
+    if model not in PRICE_PER_MTOK:
+        return None
+    price_in, price_out, price_cache_read = PRICE_PER_MTOK[model]
+    uncached = result.input_tokens - result.cache_read_tokens - result.cache_write_tokens
+    return (
+        uncached * price_in
+        + result.cache_write_tokens * price_in * CACHE_WRITE_MULTIPLIER
+        + result.cache_read_tokens * price_cache_read
+        + result.output_tokens * price_out
+    ) / 1e6
+
+
+def _lead(answer: str, sentences: int) -> str:
+    """The first `sentences` sentences: where a direct answer or a refusal must appear."""
+    return " ".join(re.split(r"(?<=[.!?])\s+", answer.strip())[:sentences])
+
+
 def grade(case: dict[str, Any], result: AgentResult) -> dict[str, bool]:
     checks: dict[str, bool] = {}
-    answer = result.answer
+    answer = result.answer.replace(chr(0x2019), "'")  # curly apostrophe -> straight
+    if case.get("forbidden_patterns"):
+        # e.g. a refusal that still quotes an invented figure must fail.
+        checks["no_forbidden"] = not any(
+            re.search(p, answer, re.IGNORECASE) for p in case["forbidden_patterns"])
     if case["kind"] == "unanswerable":
-        normalised = answer.replace(chr(0x2019), "'")  # curly apostrophe -> straight
-        checks["abstained"] = bool(answer) and bool(_ABSTAIN.search(normalised))
+        checks["abstained"] = bool(_ABSTAIN.search(_lead(answer, 2)))
         return checks
     checks["answered"] = bool(answer)
+    if case.get("lead_terms"):
+        lead = _lead(answer, 1).lower()
+        checks["lead"] = all(t.lower() in lead for t in case["lead_terms"])
     if case.get("expected_numbers"):
         found = extract_numbers(answer)
         checks["numbers"] = all(number_matches(e, found) for e in case["expected_numbers"])
@@ -187,10 +219,7 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         results.append(AgentCaseResult(
             id=case["id"], kind=case["kind"], passed=all(checks.values()), checks=checks,
             latency_s=r.latency_s, input_tokens=r.input_tokens, output_tokens=r.output_tokens,
-            cost_usd=r.cost_usd if r.cost_usd is not None else (
-                r.input_tokens * PRICE_PER_MTOK["input"]
-                + r.output_tokens * PRICE_PER_MTOK["output"]
-            ) / 1e6,
+            cost_usd=estimate_cost(agent.model, r),
             answer=r.answer, tools_used=[c["name"] for c in r.tool_calls],
         ))
 
@@ -203,7 +232,7 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         return round(sum(values) / len(values), 3) if values else None
 
     latencies = sorted(r.latency_s for r in results)
-    cost = sum(r.cost_usd for r in results)
+    costs = [r.cost_usd for r in results if r.cost_usd is not None]
     return {
         "cases": len(results),
         "pass_rate": rate(lambda _: True),
@@ -214,7 +243,7 @@ def evaluate_agent(agent: ResearchAgent, cases: list[dict[str, Any]]) -> dict[st
         "abstention_accuracy": check_rate("abstained"),
         "latency_p50_s": statistics.median(latencies) if latencies else None,
         "latency_p95_s": latencies[int(0.95 * (len(latencies) - 1))] if latencies else None,
-        "avg_cost_usd": round(cost / max(len(results), 1), 4),
+        "avg_cost_usd": round(sum(costs) / len(costs), 4) if costs else None,
         "per_case": [asdict(r) for r in results],
     }
 
@@ -233,6 +262,9 @@ def load_latest_agent_reports(results_dir: Path) -> list[dict[str, Any]]:
 
 
 def comparison_table(reports: list[dict[str, Any]]) -> str:
+    def money(value: float | None) -> str:
+        return "n/a" if value is None else f"${value:.4f}"
+
     def pct(value: float | None) -> str:
         return "n/a" if value is None else f"{100 * value:.0f}%"
 
@@ -245,6 +277,6 @@ def comparison_table(reports: list[dict[str, Any]]) -> str:
         rows.append(
             f"| {r['model']} | {pct(a['pass_rate'])} | {pct(a['numeric_accuracy'])} | "
             f"{pct(a['citation_accuracy'])} | {pct(a['abstention_accuracy'])} | "
-            f"{a['latency_p50_s']:.1f}s | ${a['avg_cost_usd']:.4f} |"
+            f"{a['latency_p50_s']:.1f}s | {money(a['avg_cost_usd'])} |"
         )
     return "\n".join(rows)

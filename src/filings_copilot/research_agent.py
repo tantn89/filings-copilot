@@ -25,11 +25,13 @@ Work method: check what data exists if unsure, gather evidence with tools, then 
 Compute derived figures (growth, margins) in SQL rather than in your head.
 
 Answer format: lead with the direct answer in 1-3 sentences, then supporting detail.
-Cite narrative claims with the passage ids from search_filings, e.g. [NVDA-2025-7-0012].
+Cite narrative claims with the passage ids from search_filings, one id per bracket,
+e.g. [NVDA-2025-7-0012][NVDA-2025-1A-0003].
 Format money in billions or millions with the fiscal year, e.g. "$130.5B in FY2025".
 If the data does not contain the answer, say so plainly instead of guessing."""
 
-_CITATION_ID = re.compile(r"\[([A-Z.\-]+-\d{4}-\d{1,2}[A-C]?-\d{4})\]")
+CITATION_ID = re.compile(r"[A-Z.\-]+-\d{4}-\d{1,2}[A-C]?-\d{4}")
+_BRACKET = re.compile(r"\[([^\[\]]+)\]")
 
 EventType = Literal["tool_call", "tool_result", "answer", "error"]
 
@@ -45,8 +47,10 @@ class AgentResult:
     answer: str
     citations: list[RetrievedChunk]
     tool_calls: list[dict[str, Any]]
-    input_tokens: int = 0
+    input_tokens: int = 0  # all input, including the cached parts below
     output_tokens: int = 0
+    cache_read_tokens: int = 0
+    cache_write_tokens: int = 0
     cost_usd: float | None = None  # billed cost when the provider reports it (OpenRouter)
     latency_s: float = 0.0
     stop_reason: str = ""
@@ -91,12 +95,17 @@ class ResearchAgent:
         messages: list[dict[str, Any]] = [{"role": "user", "content": question}]
         seen: dict[str, RetrievedChunk] = {}
         tool_calls: list[dict[str, Any]] = []
-        usage = {"input_tokens": 0, "output_tokens": 0}
+        usage = {"input_tokens": 0, "output_tokens": 0,
+                 "cache_read_tokens": 0, "cache_write_tokens": 0}
         reported_costs: list[float] = []
 
         for _ in range(self.max_turns):
             response = self._request(messages)
-            usage["input_tokens"] += _input_tokens(response.usage)
+            cache_read = getattr(response.usage, "cache_read_input_tokens", 0) or 0
+            cache_write = getattr(response.usage, "cache_creation_input_tokens", 0) or 0
+            usage["input_tokens"] += response.usage.input_tokens + cache_read + cache_write
+            usage["cache_read_tokens"] += cache_read
+            usage["cache_write_tokens"] += cache_write
             usage["output_tokens"] += response.usage.output_tokens
             if getattr(response.usage, "cost_usd", None) is not None:
                 reported_costs.append(float(response.usage.cost_usd))
@@ -108,9 +117,9 @@ class ResearchAgent:
             if response.stop_reason == "max_tokens":
                 yield AgentEvent("error", {"message": "Response hit max_tokens."})
                 return
-            if response.stop_reason != "tool_use":
+            if response.stop_reason == "end_turn":
                 text = "".join(b.text for b in response.content if b.type == "text").strip()
-                cited = [seen[c] for c in dict.fromkeys(_CITATION_ID.findall(text)) if c in seen]
+                cited = [seen[c] for c in cited_ids(text) if c in seen]
                 yield AgentEvent("answer", {
                     "answer": text,
                     "citations": [_citation_dict(c) for c in cited],
@@ -120,6 +129,11 @@ class ResearchAgent:
                     "cost_usd": round(sum(reported_costs), 6) if reported_costs else None,
                     **usage,
                 })
+                return
+            if response.stop_reason != "tool_use":
+                # e.g. model_context_window_exceeded: partial text is not an answer.
+                yield AgentEvent("error", {
+                    "message": f"The model stopped early ({response.stop_reason})."})
                 return
 
             results = []
@@ -160,6 +174,8 @@ class ResearchAgent:
             tool_calls=d["tool_calls"],
             input_tokens=d["input_tokens"],
             output_tokens=d["output_tokens"],
+            cache_read_tokens=d["cache_read_tokens"],
+            cache_write_tokens=d["cache_write_tokens"],
             cost_usd=d["cost_usd"],
             latency_s=d["latency_s"],
             stop_reason=d["stop_reason"],
@@ -167,12 +183,18 @@ class ResearchAgent:
         )
 
 
-def _input_tokens(usage: Any) -> int:
-    return int(
-        usage.input_tokens
-        + (getattr(usage, "cache_read_input_tokens", 0) or 0)
-        + (getattr(usage, "cache_creation_input_tokens", 0) or 0)
-    )
+def cited_ids(text: str) -> list[str]:
+    """Citation ids in order of first appearance.
+
+    Accepts one id per bracket ("[A][B]") and grouped ids ("[A, B]"); a bracket counts only
+    if every token in it is an id, so prose like "[1]" or "[note]" is ignored.
+    """
+    ids: dict[str, None] = {}
+    for group in _BRACKET.findall(text):
+        tokens = [t for t in re.split(r"[,;\s]+", group) if t]
+        if tokens and all(CITATION_ID.fullmatch(t) for t in tokens):
+            ids.update(dict.fromkeys(tokens))
+    return list(ids)
 
 
 def _citation_dict(chunk: RetrievedChunk) -> dict[str, Any]:

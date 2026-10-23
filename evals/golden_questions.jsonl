@@ -1,13 +1,13 @@
-{"id": "num-nvda-revenue", "kind": "numeric", "question": "What was NVIDIA's total revenue in fiscal year 2025?", "expected_numbers": [{"value": 130.497e9, "rel_tol": 0.01}]}
+{"id": "num-nvda-revenue", "kind": "numeric", "question": "What was NVIDIA's total revenue in fiscal year 2025?", "expected_numbers": [{"value": 130497000000.0, "rel_tol": 0.01}]}
 {"id": "num-nvda-growth", "kind": "numeric", "question": "By what percentage did NVIDIA's revenue grow from fiscal 2024 to fiscal 2025?", "expected_numbers": [{"value": 114.2, "unit": "%", "abs_tol": 1.0}]}
 {"id": "num-nvda-gross-margin", "kind": "numeric", "question": "What was NVIDIA's gross margin in fiscal 2025?", "expected_numbers": [{"value": 75.0, "unit": "%", "abs_tol": 0.3}]}
-{"id": "num-aapl-net-income", "kind": "numeric", "question": "How much net income did Apple report for fiscal 2025?", "expected_numbers": [{"value": 112.01e9, "rel_tol": 0.01}]}
-{"id": "num-msft-revenue", "kind": "numeric", "question": "What was Microsoft's revenue in fiscal year 2025?", "expected_numbers": [{"value": 281.724e9, "rel_tol": 0.01}]}
-{"id": "num-msft-operating-income", "kind": "numeric", "question": "What was Microsoft's operating income in FY2025?", "expected_numbers": [{"value": 128.528e9, "rel_tol": 0.01}]}
-{"id": "num-aapl-rnd", "kind": "numeric", "question": "How much did Apple spend on research and development in fiscal 2025?", "expected_numbers": [{"value": 34.55e9, "rel_tol": 0.01}]}
+{"id": "num-aapl-net-income", "kind": "numeric", "question": "How much net income did Apple report for fiscal 2025?", "expected_numbers": [{"value": 112010000000.0, "rel_tol": 0.01}]}
+{"id": "num-msft-revenue", "kind": "numeric", "question": "What was Microsoft's revenue in fiscal year 2025?", "expected_numbers": [{"value": 281724000000.0, "rel_tol": 0.01}]}
+{"id": "num-msft-operating-income", "kind": "numeric", "question": "What was Microsoft's operating income in FY2025?", "expected_numbers": [{"value": 128528000000.0, "rel_tol": 0.01}]}
+{"id": "num-aapl-rnd", "kind": "numeric", "question": "How much did Apple spend on research and development in fiscal 2025?", "expected_numbers": [{"value": 34550000000.0, "rel_tol": 0.01}]}
 {"id": "num-aapl-eps", "kind": "numeric", "question": "What was Apple's diluted earnings per share for fiscal 2025?", "expected_numbers": [{"value": 7.46, "unit": "$", "abs_tol": 0.01}]}
-{"id": "num-nvda-fcf", "kind": "numeric", "question": "What was NVIDIA's free cash flow (operating cash flow minus capital expenditure) in fiscal 2025?", "expected_numbers": [{"value": 60.853e9, "rel_tol": 0.01}]}
-{"id": "num-highest-margin", "kind": "numeric", "question": "Among NVIDIA, Microsoft and Apple, which company had the highest gross margin in fiscal 2025, and what was it?", "expected_numbers": [{"value": 75.0, "unit": "%", "abs_tol": 0.3}], "expected_terms": ["NVIDIA"]}
+{"id": "num-nvda-fcf", "kind": "numeric", "question": "What was NVIDIA's free cash flow (operating cash flow minus capital expenditure) in fiscal 2025?", "expected_numbers": [{"value": 60853000000.0, "rel_tol": 0.01}]}
+{"id": "num-highest-margin", "kind": "numeric", "question": "Among NVIDIA, Microsoft and Apple, which company had the highest gross margin in fiscal 2025, and what was it?", "expected_numbers": [{"value": 75.0, "unit": "%", "abs_tol": 0.3}], "expected_terms": ["NVIDIA"], "lead_terms": ["NVIDIA"]}
 {"id": "txt-nvda-export", "kind": "narrative", "question": "What risks does NVIDIA describe related to US export controls on sales to China?", "expected_citations": [{"ticker": "NVDA", "section_item": "1A"}], "expected_terms": ["export"]}
 {"id": "txt-nvda-margin-why", "kind": "mixed", "question": "Why did NVIDIA's gross margin increase in fiscal 2025, and to what level?", "expected_citations": [{"ticker": "NVDA", "section_item": "7", "fiscal_year": 2025}], "expected_numbers": [{"value": 75.0, "unit": "%", "abs_tol": 0.3}], "expected_terms": ["Data Center"]}
 {"id": "txt-aapl-outsourcing", "kind": "narrative", "question": "How does Apple describe its dependence on outsourcing partners for manufacturing?", "expected_citations": [{"ticker": "AAPL", "section_item": "1A"}], "expected_terms": ["outsourcing"]}
@@ -16,5 +16,5 @@
 {"id": "txt-aapl-fx", "kind": "narrative", "question": "How is Apple exposed to foreign currency exchange rate risk?", "expected_citations": [{"ticker": "AAPL", "section_item": "7A"}, {"ticker": "AAPL", "section_item": "1A"}], "expected_terms": ["currenc"]}
 {"id": "txt-nvda-supply", "kind": "narrative", "question": "Which manufacturing partners does NVIDIA depend on, and what supply chain risks does it flag?", "expected_citations": [{"ticker": "NVDA", "section_item": "1A"}, {"ticker": "NVDA", "section_item": "1"}], "expected_terms": ["TSMC"]}
 {"id": "txt-aapl-seasonality", "kind": "narrative", "question": "Does Apple's business have seasonal patterns?", "expected_citations": [{"ticker": "AAPL", "section_item": "7"}, {"ticker": "AAPL", "section_item": "1A"}, {"ticker": "AAPL", "section_item": "1"}], "expected_terms": ["season"]}
-{"id": "abs-tesla", "kind": "unanswerable", "question": "What was Tesla's revenue in fiscal 2025?"}
-{"id": "abs-forecast", "kind": "unanswerable", "question": "What will NVIDIA's revenue be in fiscal 2028?"}
+{"id": "abs-tesla", "kind": "unanswerable", "question": "What was Tesla's revenue in fiscal 2025?", "forbidden_patterns": ["\\$\\s?\\d"]}
+{"id": "abs-forecast", "kind": "unanswerable", "question": "What will NVIDIA's revenue be in fiscal 2028?", "forbidden_patterns": ["2028[^.\\n]{0,60}\\$\\s?\\d", "\\$\\s?\\d[^.\\n]{0,60}2028"]}

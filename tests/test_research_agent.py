@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from conftest import ScriptedMessagesAPI, fake_response, text_block, tool_use_block
 from filings_copilot.agent_tools import ToolExecutor
-from filings_copilot.research_agent import ResearchAgent
+from filings_copilot.research_agent import ResearchAgent, cited_ids
 
 
 def test_agent_runs_tools_and_collects_citations(tools: ToolExecutor) -> None:
@@ -66,3 +66,26 @@ def test_agent_handles_refusal_and_turn_limit(tools: ToolExecutor) -> None:
     ])
     events = list(ResearchAgent(looping.create, tools, max_turns=3).stream("loop"))
     assert events[-1].type == "error" and "3 turns" in events[-1].data["message"]
+
+
+def test_cited_ids_accepts_grouped_and_separate_brackets() -> None:
+    text = ("Margins rose [NVDA-2025-7-0001, NVDA-2025-7-0000]; risks remain [NVDA-2025-1A-0002]"
+            "[NVDA-2025-7-0001]. See note [1] and [not an id, NVDA-2025-7-0003].")
+    assert cited_ids(text) == ["NVDA-2025-7-0001", "NVDA-2025-7-0000", "NVDA-2025-1A-0002"]
+
+
+def test_non_final_stop_reasons_are_errors_not_answers(tools: ToolExecutor) -> None:
+    api = ScriptedMessagesAPI([
+        fake_response([text_block("Partial text")], "model_context_window_exceeded")])
+    events = list(ResearchAgent(api.create, tools).stream("q"))
+    assert [e.type for e in events] == ["error"]
+    assert "model_context_window_exceeded" in events[0].data["message"]
+
+
+def test_cache_tokens_are_tracked_separately(tools: ToolExecutor) -> None:
+    response = fake_response([text_block("ok")], "end_turn")
+    response.usage.cache_read_input_tokens = 900
+    response.usage.cache_creation_input_tokens = 50
+    result = ResearchAgent(ScriptedMessagesAPI([response]).create, tools).ask("q")
+    assert (result.input_tokens, result.cache_read_tokens, result.cache_write_tokens) == (
+        1050, 900, 50)

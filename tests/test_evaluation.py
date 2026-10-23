@@ -10,6 +10,7 @@ from filings_copilot.agent_tools import ToolExecutor
 from filings_copilot.evaluation import (
     ExtractedNumber,
     comparison_table,
+    estimate_cost,
     evaluate_agent,
     evaluate_retrieval,
     extract_numbers,
@@ -109,3 +110,34 @@ def test_abstention_phrasings_are_recognised(answer: str) -> None:
 def test_a_confident_answer_is_not_an_abstention() -> None:
     result = AgentResult("Tesla's revenue was $97.7B in fiscal 2025.", [], [])
     assert grade({"kind": "unanswerable"}, result) == {"abstained": False}
+
+
+def test_refusal_that_still_invents_a_figure_fails() -> None:
+    case = {"kind": "unanswerable", "forbidden_patterns": [r"\$\s?\d"]}
+    lying = AgentResult("Tesla is not in my database, but its revenue was about $97.7B.", [], [])
+    honest = AgentResult("Tesla is not in the database, so I can't give that figure.", [], [])
+    assert grade(case, lying) == {"no_forbidden": False, "abstained": True}
+    assert grade(case, honest) == {"no_forbidden": True, "abstained": True}
+
+
+def test_refusal_must_lead_the_answer() -> None:
+    buried = AgentResult(
+        "NVIDIA will grow fast. Revenue should triple. Of course I cannot predict it.", [], [])
+    assert grade({"kind": "unanswerable"}, buried) == {"abstained": False}
+
+
+def test_lead_terms_must_be_in_the_first_sentence() -> None:
+    case = {"kind": "numeric", "lead_terms": ["NVIDIA"]}
+    wrong = AgentResult("Microsoft had the highest margin at 69.8%. NVIDIA was 75.0%.", [], [])
+    right = AgentResult("NVIDIA had the highest margin at 75.0%. Microsoft was 69.8%.", [], [])
+    assert grade(case, wrong)["lead"] is False
+    assert grade(case, right)["lead"] is True
+
+
+def test_cost_estimate_prices_cache_tokens_and_skips_unknown_models() -> None:
+    result = AgentResult("ok", [], [], input_tokens=1_000_000, output_tokens=100_000,
+                         cache_read_tokens=600_000, cache_write_tokens=100_000)
+    # uncached 300k x $2 + writes 100k x $2.5 + reads 600k x $0.2 + output 100k x $10
+    assert estimate_cost("claude-sonnet-5-5", result) == pytest.approx(0.6 + 0.25 + 0.12 + 1.0)
+    assert estimate_cost("some/unknown-model", result) is None
+    assert estimate_cost("x", AgentResult("ok", [], [], cost_usd=0.5)) == 0.5
