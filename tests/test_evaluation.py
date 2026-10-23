@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from conftest import ScriptedMessagesAPI, fake_response, text_block, tool_use_block
 from filings_copilot.agent_tools import ToolExecutor
 from filings_copilot.evaluation import (
@@ -11,10 +13,11 @@ from filings_copilot.evaluation import (
     evaluate_agent,
     evaluate_retrieval,
     extract_numbers,
+    grade,
     load_latest_agent_reports,
     number_matches,
 )
-from filings_copilot.research_agent import ResearchAgent
+from filings_copilot.research_agent import AgentResult, ResearchAgent
 
 
 def test_extract_numbers_understands_scales_and_percent() -> None:
@@ -90,3 +93,19 @@ def test_comparison_table_uses_latest_report_per_model(tmp_path: Path) -> None:
     assert len(table) == 4
     assert table[2].startswith("| a/one | 90% | 100% | 50% | n/a | 12.3s | $0.0123 |")
     assert table[3].startswith("| b/two | 70%")
+
+
+@pytest.mark.parametrize("answer", [
+    # Real abstentions from Claude Opus 5.5 / Sonnet 5.5 that an earlier phrase list missed.
+    "I can't tell you what NVIDIA's FY2028 revenue will be. My data covers only reported "
+    "results, so any number I gave would be a guess.",
+    "I can't give you Tesla's fiscal 2025 revenue because the database has no Tesla data.",
+    "Tesla isn't in the database.",
+])
+def test_abstention_phrasings_are_recognised(answer: str) -> None:
+    assert grade({"kind": "unanswerable"}, AgentResult(answer, [], [])) == {"abstained": True}
+
+
+def test_a_confident_answer_is_not_an_abstention() -> None:
+    result = AgentResult("Tesla's revenue was $97.7B in fiscal 2025.", [], [])
+    assert grade({"kind": "unanswerable"}, result) == {"abstained": False}

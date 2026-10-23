@@ -28,10 +28,13 @@ _NUMBER = re.compile(
     r"(?P<suffix>%|(?:percent|trillion|billion|million|thousand|bn|mn|[tbmk])\b)?",
     re.IGNORECASE,
 )
+# Phrases that signal the agent declined to answer from outside its data. Answers are
+# matched after curly apostrophes are normalised to straight ones.
 _ABSTAIN = re.compile(
-    r"(not (?:available|in|included|contain|have)|no (?:data|information|10-k)|"
-    r"don't have|do not have|cannot (?:predict|forecast|provide)|can't (?:predict|forecast)|"
-    r"unable to|isn't (?:available|in)|outside (?:the|my) data)",
+    r"(not (?:available|in|included|contain|have)|no (?:\w+ )?(?:data|information|10-k)|"
+    r"(?:don|doesn)'t have|do not have|has no|unable to|isn't (?:available|in)|"
+    r"(?:cannot|can't|won't) (?:tell|give|predict|forecast|provide|say|know)|"
+    r"outside (?:the|my) data|would be a guess|rather not (?:quote|guess))",
     re.IGNORECASE,
 )
 
@@ -158,7 +161,8 @@ def grade(case: dict[str, Any], result: AgentResult) -> dict[str, bool]:
     checks: dict[str, bool] = {}
     answer = result.answer
     if case["kind"] == "unanswerable":
-        checks["abstained"] = bool(answer) and bool(_ABSTAIN.search(answer))
+        normalised = answer.replace(chr(0x2019), "'")  # curly apostrophe -> straight
+        checks["abstained"] = bool(answer) and bool(_ABSTAIN.search(normalised))
         return checks
     checks["answered"] = bool(answer)
     if case.get("expected_numbers"):
