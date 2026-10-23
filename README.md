@@ -10,9 +10,11 @@ filing text with hybrid search, and answers with citations that link to the sour
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
-> **Live API:** [`/health`](https://filings-copilot-api-723085469023.us-central1.run.app/health) ·
-> [`/docs`](https://filings-copilot-api-723085469023.us-central1.run.app/docs) on Cloud Run.
-> Web UI link: _coming with the Vercel deploy_.
+> **Live demo: [filings-copilot.vercel.app](https://filings-copilot.vercel.app)** ·
+> try [*"Why did NVIDIA's gross margin increase in FY2025?"*](https://filings-copilot.vercel.app/?q=Why%20did%20NVIDIA%27s%20gross%20margin%20increase%20in%20fiscal%202025%2C%20and%20to%20what%20level%3F)
+> · API [`/health`](https://filings-copilot-api-723085469023.us-central1.run.app/health) on Cloud Run.
+> The public demo runs Claude Sonnet 5.5 and is capped at 50 questions a day; if the cap
+> is reached, run it locally with your own key.
 
 ---
 
@@ -223,7 +225,7 @@ evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
 - [ ] Harder golden set (50+ questions) and an effort-level sweep
 - [ ] Query decomposition for multi-part questions (target: the TSMC miss)
 - [x] Deploy API on Cloud Run with spend caps and a budget alert
-- [ ] Deploy UI on Vercel
+- [x] Deploy UI on Vercel; API CORS locked to the UI origin
 - [ ] OpenTelemetry traces per tool call
 - [ ] Scale to S&P 100 with incremental ingest and `vss` HNSW index
 
