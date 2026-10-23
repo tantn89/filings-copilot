@@ -10,7 +10,9 @@ filing text with hybrid search, and answers with citations that link to the sour
 ![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
-> Demo GIF / live link: _coming with the web UI (see roadmap)_
+> **Live API:** [`/health`](https://filings-copilot-api-723085469023.us-central1.run.app/health) ·
+> [`/docs`](https://filings-copilot-api-723085469023.us-central1.run.app/docs) on Cloud Run.
+> Web UI link: _coming with the Vercel deploy_.
 
 ---
 
@@ -177,10 +179,13 @@ cost per call, which the eval report uses for cost per question.
 
 ## Deploy
 
-- **API → Hugging Face Space (Docker).** `python scripts/deploy_hf_space.py --space <user>/filings-copilot-api`
-  uploads the image source plus the pre-built DuckDB file, stores LLM keys as Space secrets,
-  and refuses to deploy without a daily question cap: every public question costs credits.
-- **UI → Vercel.** Root directory `web/`, env `NEXT_PUBLIC_API_URL=<Space URL>`; then set
+- **API → Google Cloud Run.** `python scripts/deploy_cloud_run.py --project <gcp-project>`
+  builds the Dockerfile with Cloud Build (the pre-built DuckDB file ships in the image),
+  stores LLM keys in Secret Manager, and deploys with scale-to-zero and one max instance.
+  It refuses to deploy without a daily question cap: every public question costs credits.
+  `/health` publishes the active model and limits so the protection is checkable.
+  Running cost sits inside the Cloud Run free tier; a billing budget alert covers surprises.
+- **UI → Vercel.** Root directory `web/`, env `NEXT_PUBLIC_API_URL=<Cloud Run URL>`; then set
   `FILINGS_CORS_ORIGINS` to the Vercel URL and redeploy the API.
 
 ## API
@@ -217,7 +222,8 @@ evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
 - [x] Publish full agent eval across models (Opus 5.5 vs Sonnet 5.5)
 - [ ] Harder golden set (50+ questions) and an effort-level sweep
 - [ ] Query decomposition for multi-part questions (target: the TSMC miss)
-- [ ] Deploy: API on Cloud Run, UI on Vercel
+- [x] Deploy API on Cloud Run with spend caps and a budget alert
+- [ ] Deploy UI on Vercel
 - [ ] OpenTelemetry traces per tool call
 - [ ] Scale to S&P 100 with incremental ingest and `vss` HNSW index
 
