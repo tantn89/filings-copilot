@@ -6,17 +6,22 @@ rebuilds the image on every upload.
 
     python scripts/deploy_hf_space.py --space <user>/filings-copilot-api
 
-Requires a Hugging Face write token (HF_TOKEN or `hf auth login`). LLM keys are stored
-as Space secrets, never uploaded.
+Requires a Hugging Face write token (HF_TOKEN / HUGGINGFACE_TOKEN in .env, or
+`hf auth login`). LLM keys are stored as Space secrets, never uploaded. Pass --ipv4 on
+networks where IPv6 resolves but does not route. TLS is verified against the operating
+system's trust store (truststore), so HTTPS-inspecting antivirus or corporate proxies the
+OS already trusts work without disabling verification.
 """
 
 from __future__ import annotations
 
 import argparse
 import shutil
+import socket
 import tempfile
 from pathlib import Path
 
+import truststore
 from huggingface_hub import HfApi
 
 from filings_copilot.config import Settings
@@ -40,11 +45,25 @@ API for [filings-copilot](https://github.com/tantn89/filings-copilot): `POST /as
 """
 
 
+def force_ipv4() -> None:
+    """Make every socket in this process resolve hosts to IPv4 addresses only."""
+    original = socket.getaddrinfo
+
+    def ipv4_only(host, port, family=0, type=0, proto=0, flags=0):  # type: ignore[no-untyped-def]
+        return original(host, port, socket.AF_INET, type, proto, flags)
+
+    socket.getaddrinfo = ipv4_only  # type: ignore[assignment]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--space", required=True, help="e.g. tantn89/filings-copilot-api")
     parser.add_argument("--private", action="store_true")
+    parser.add_argument("--ipv4", action="store_true", help="Connect over IPv4 only")
     args = parser.parse_args()
+    truststore.inject_into_ssl()
+    if args.ipv4:
+        force_ipv4()
 
     settings = Settings()
     db = ROOT / settings.db_path
@@ -55,7 +74,9 @@ def main() -> None:
         raise SystemExit("Refusing to deploy a public demo without a daily question cap "
                          "(FILINGS_DEMO_DAILY_QUESTION_CAP).")
 
-    api = HfApi()  # token from HF_TOKEN or `hf auth login`
+    api = HfApi(token=settings.hf_token or None)  # None: fall back to `hf auth login`
+    user = api.whoami()["name"]
+    print(f"Authenticated to Hugging Face as {user}")
     api.create_repo(args.space, repo_type="space", space_sdk="docker",
                     private=args.private, exist_ok=True)
 

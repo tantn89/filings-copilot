@@ -30,6 +30,10 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("OPENROUTER_API_KEY", "FILINGS_OPENROUTER_API_KEY"),
     )
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    # Only used by scripts/deploy_hf_space.py.
+    hf_token: str = Field(
+        default="", validation_alias=AliasChoices("HF_TOKEN", "HUGGINGFACE_TOKEN")
+    )
     llm_effort: str = "medium"
     max_agent_turns: int = 8
 
