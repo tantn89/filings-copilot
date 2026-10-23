@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import uuid
 from collections.abc import Iterator
 from dataclasses import asdict
 
@@ -15,16 +17,24 @@ from filings_copilot.app_factory import Runtime, build_runtime
 from filings_copilot.config import Settings, get_settings
 from filings_copilot.usage_limiter import UsageLimiter, UsageLimitExceeded
 
+log = logging.getLogger("filings_copilot.api")
+
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=3, max_length=1000)
 
 
-def _client_id(request: Request) -> str:
-    # Behind Cloud Run / Vercel / Render the caller's IP is the first X-Forwarded-For entry.
-    forwarded = request.headers.get("x-forwarded-for", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+def _client_id(request: Request, trusted_hops: int) -> str:
+    """The caller's IP as seen by the platform's own proxy.
+
+    Proxies append the address they received a connection from, so entries on the left
+    of X-Forwarded-For are client-supplied and spoofable. The entry `trusted_hops` from
+    the right was written by the platform (1 = the last proxy, e.g. Google's front end on
+    Cloud Run). 0 ignores the header and uses the socket peer.
+    """
+    parts = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    if trusted_hops and len(parts) >= trusted_hops:
+        return parts[-trusted_hops]
     return request.client.host if request.client else "unknown"
 
 
@@ -42,8 +52,12 @@ def create_app(runtime: Runtime | None = None, settings: Settings | None = None)
     )
 
     def guard(request: Request) -> None:
+        client = _client_id(request, settings.trusted_proxy_hops)
+        forwarded = request.headers.get("x-forwarded-for", "")
+        log.info("question client=%s forwarded_entries=%d", client,
+                 len([p for p in forwarded.split(",") if p.strip()]))
         try:
-            limiter.check_and_record(_client_id(request))
+            limiter.check_and_record(client)
         except UsageLimitExceeded as e:
             raise HTTPException(status_code=429, detail=str(e)) from None
 
@@ -83,8 +97,12 @@ def create_app(runtime: Runtime | None = None, settings: Settings | None = None)
             try:
                 for event in runtime.agent.stream(body.question):
                     yield {"event": event.type, "data": json.dumps(event.data, default=str)}
-            except Exception as e:  # surface provider failures to the UI instead of a dead stream
-                yield {"event": "error", "data": json.dumps({"message": f"Agent failed: {e}"})}
+            except Exception:
+                # Details (provider bodies, SQL) stay in server logs; the client gets a reference.
+                ref = uuid.uuid4().hex[:8]
+                log.exception("agent failed ref=%s", ref)
+                message = f"The research agent hit an internal error (ref {ref}). Please retry."
+                yield {"event": "error", "data": json.dumps({"message": message})}
 
         return EventSourceResponse(events())
 

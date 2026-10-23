@@ -35,6 +35,9 @@ class Settings(BaseSettings):
 
     # HTTP API. Limits protect LLM credits on a public demo; 0 disables a limit.
     cors_origins: str = "*"
+    # X-Forwarded-For entries appended by trusted proxies (1 on Cloud Run; 0 when the app
+    # is reached directly). Used to key the per-client question limit.
+    trusted_proxy_hops: int = 1
     demo_questions_per_hour: int = 0
     demo_daily_question_cap: int = 0
 
