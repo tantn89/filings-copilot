@@ -10,3 +10,7 @@ data/
 evals/results/
 node_modules/
 .next/
+
+# Local agent notes and review reports (not part of the project)
+.claude/
+plans/
