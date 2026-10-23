@@ -1,0 +1,18 @@
+# Files uploaded to Cloud Build for `gcloud run deploy --source`.
+# Written explicitly (instead of inheriting .gitignore) so the pre-built
+# data/filings.duckdb, which git ignores, is included in the image.
+.git/
+.gitignore
+.gcloudignore
+.venv/
+**/__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+evals/
+tests/
+web/
+plans/
+docs/
+scripts/
