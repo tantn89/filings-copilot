@@ -14,8 +14,10 @@ Requires `gcloud auth login` and a project with billing enabled.
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from filings_copilot.config import Settings
@@ -43,6 +45,13 @@ def put_secret(project: str, name: str, value: str) -> None:
     if not exists:
         gcloud("secrets", "create", name, f"--project={project}",
                "--replication-policy=automatic", stdin="")
+    else:
+        # Free tier covers 6 active versions: only add one when the value changed.
+        latest = gcloud("secrets", "versions", "access", "latest", f"--secret={name}",
+                        f"--project={project}", stdin="", check=False)
+        if latest.returncode == 0 and latest.stdout == value:
+            print(f"secret {name}: unchanged")
+            return
     gcloud("secrets", "versions", "add", name, f"--project={project}", "--data-file=-",
            stdin=value)
     print(f"secret {name}: new version stored")
@@ -74,13 +83,14 @@ def main() -> None:
     if not bindings:
         raise SystemExit("No LLM key found in .env (ANTHROPIC_API_KEY or OPENROUTER_API_KEY).")
 
-    # Cloud Run's default compute service account needs to read the secrets.
+    # In new projects the default compute service account both builds the image (Cloud
+    # Build) and runs the service, so it needs the builder role and secret read access.
     number = gcloud("projects", "describe", args.project, "--format=value(projectNumber)",
                     stdin="").stdout.strip()
-    gcloud("projects", "add-iam-policy-binding", args.project,
-           f"--member=serviceAccount:{number}-compute@developer.gserviceaccount.com",
-           "--role=roles/secretmanager.secretAccessor", "--condition=None", "--quiet",
-           stdin="")
+    for role in ("roles/run.builder", "roles/secretmanager.secretAccessor"):
+        gcloud("projects", "add-iam-policy-binding", args.project,
+               f"--member=serviceAccount:{number}-compute@developer.gserviceaccount.com",
+               f"--role={role}", "--condition=None", "--quiet", stdin="")
 
     env_vars = {
         "FILINGS_LLM_PROVIDER": settings.llm_provider,
@@ -90,6 +100,11 @@ def main() -> None:
         "FILINGS_DEMO_QUESTIONS_PER_HOUR": str(settings.demo_questions_per_hour),
         "FILINGS_DEMO_DAILY_QUESTION_CAP": str(settings.demo_daily_question_cap),
     }
+    # An env-vars file, not --set-env-vars: on Windows gcloud.cmd runs through cmd.exe,
+    # which eats the "^@^" custom-delimiter syntax and merges every variable into one.
+    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False, encoding="utf-8") as f:
+        json.dump(env_vars, f)  # a JSON object is valid YAML
+        env_file = f.name
     gcloud(
         "run", "deploy", SERVICE, "--source", str(ROOT),
         f"--project={args.project}", f"--region={args.region}",
@@ -99,10 +114,11 @@ def main() -> None:
         # zero minimum instances means no cost while idle.
         "--min-instances=0", "--max-instances=1", "--concurrency=20",
         "--timeout=300",
-        "--set-env-vars=^@^" + "@".join(f"{k}={v}" for k, v in env_vars.items()),
+        f"--env-vars-file={env_file}",
         "--set-secrets=" + ",".join(bindings),
         "--quiet",
     )
+    Path(env_file).unlink()
     url = gcloud("run", "services", "describe", SERVICE, f"--project={args.project}",
                  f"--region={args.region}", "--format=value(status.url)", stdin="").stdout.strip()
     print(f"Deployed: {url}  (try {url}/health)")

@@ -53,7 +53,14 @@ def create_app(runtime: Runtime | None = None, settings: Settings | None = None)
             "SELECT (SELECT count(*) FROM filings), (SELECT count(*) FROM chunks)"
         ).fetchone()
         filings, chunks = row if row else (0, 0)
-        return {"status": "ok", "filings": filings, "chunks": chunks, "model": runtime.agent.model}
+        return {
+            "status": "ok", "filings": filings, "chunks": chunks, "model": runtime.agent.model,
+            # Published so anyone can check the demo's spend protection is active.
+            "limits": {
+                "questions_per_hour_per_client": settings.demo_questions_per_hour,
+                "questions_per_day": settings.demo_daily_question_cap,
+            },
+        }
 
     @app.get("/companies")
     def companies() -> object:
