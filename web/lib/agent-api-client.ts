@@ -1,6 +1,10 @@
 import type { AgentEvent, Company } from "./agent-types";
 
-export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+// trim() also strips invisible characters (e.g. a byte-order mark) that some shells add
+// when the value is piped into `vercel env add`; one turned the URL into a relative path.
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000")
+  .trim()
+  .replace(/\/$/, "");
 
 async function errorMessage(response: Response): Promise<string> {
   try {
