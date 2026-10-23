@@ -1,0 +1,11 @@
+# Agent eval gate, run by .github/workflows/eval-gate.yml or locally:
+#   regressgate run --out head.json && regressgate compare evals/baseline.json head.json
+# Needs data/filings.duckdb and an LLM key (ANTHROPIC_API_KEY or OpenRouter settings).
+target: filings_copilot.regressgate_target:answer
+cases: evals/golden_cases.jsonl
+repeats: 3
+concurrency: 2
+gate:
+  alpha: 0.05
+  max_mean_cost_usd: 0.03
+  max_p95_latency_s: 60

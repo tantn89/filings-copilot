@@ -92,50 +92,62 @@ def ask(question: str) -> None:
 
 @app.command("eval")
 def run_eval(
-    cases_path: Annotated[Path, typer.Option("--cases")] = Path("evals/golden_questions.jsonl"),
+    cases_path: Annotated[Path, typer.Option("--cases")] = Path("evals/golden_cases.jsonl"),
     retrieval_only: Annotated[
         bool, typer.Option(help="Score retrieval only: offline, no LLM calls, free.")
     ] = False,
+    repeats: Annotated[
+        int, typer.Option(min=1, help="Trials per question; 3+ lets regressgate separate noise.")
+    ] = 1,
     out_dir: Annotated[Path, typer.Option("--out")] = Path("evals/results"),
     provider: Annotated[str | None, typer.Option(help="Override: anthropic | openrouter")] = None,
     model: Annotated[str | None, typer.Option(help="Override the model id")] = None,
 ) -> None:
-    """Score the system against the golden question set and save a JSON report."""
+    """Score the system against the golden cases and save the reports.
+
+    Agent runs are regressgate reports: gate two of them with `regressgate compare`.
+    """
     import json
     from datetime import datetime
 
+    from regressgate import load_cases
+    from regressgate.markdown_report import render_run
+
     from filings_copilot.embeddings import FastEmbedEmbedder
-    from filings_copilot.evaluation import evaluate_agent, evaluate_retrieval, load_cases
+    from filings_copilot.evaluation import evaluate_agent, evaluate_retrieval
     from filings_copilot.filings_store import FilingsStore
     from filings_copilot.hybrid_retriever import HybridRetriever
 
     overrides = {k: v for k, v in (("llm_provider", provider), ("llm_model", model)) if v}
     settings = get_settings().model_copy(update=overrides)
     cases = load_cases(cases_path)
-    report: dict[str, object] = {
-        "provider": settings.llm_provider,
-        "model": settings.llm_model,
-        "effort": settings.llm_effort,
-    }
+    stamp = f"{datetime.now():%Y%m%d-%H%M%S}"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     if retrieval_only:
         embedder = FastEmbedEmbedder(settings.embedding_model)
         store = FilingsStore(settings.db_path, embedder.dimension, read_only=True)
-        report["retrieval"] = evaluate_retrieval(HybridRetriever(store, embedder), cases)
-    else:
-        from filings_copilot.app_factory import build_runtime
+        retrieval = evaluate_retrieval(HybridRetriever(store, embedder), cases)
+        out = out_dir / f"retrieval-{stamp}.json"
+        out.write_text(json.dumps(retrieval, indent=2), encoding="utf-8")
+        summary = {k: v for k, v in retrieval.items() if k != "per_case"}
+        typer.echo(f"retrieval: {json.dumps(summary, indent=2)}")
+        typer.echo(f"Report: {out}")
+        return
 
-        runtime = build_runtime(settings)
-        report["retrieval"] = evaluate_retrieval(runtime.agent.tools.retriever, cases)
-        report["agent"] = evaluate_agent(runtime.agent, cases)
+    from filings_copilot.app_factory import build_runtime
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out = out_dir / f"eval-{datetime.now():%Y%m%d-%H%M%S}.json"
-    out.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    for section in ("retrieval", "agent"):
-        if section in report:
-            summary = {k: v for k, v in report[section].items() if k != "per_case"}  # type: ignore[attr-defined]
-            typer.echo(f"{section}: {json.dumps(summary, indent=2)}")
+    runtime = build_runtime(settings)
+    retrieval = evaluate_retrieval(runtime.agent.tools.retriever, cases)
+    metadata = {
+        "provider": settings.llm_provider, "model": settings.llm_model,
+        "effort": settings.llm_effort,
+        "retrieval": {k: v for k, v in retrieval.items() if k != "per_case"},
+    }
+    report = evaluate_agent(runtime.agent, cases, repeats=repeats, metadata=metadata)
+    out = report.save(out_dir / f"eval-{stamp}.json")
+    typer.echo(render_run(report))
+    typer.echo(f"\nretrieval: {json.dumps(metadata['retrieval'])}")
     typer.echo(f"Report: {out}")
 
 

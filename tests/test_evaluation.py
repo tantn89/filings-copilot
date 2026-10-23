@@ -1,59 +1,50 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
+from regressgate import Case, TargetResult, load_cases
+from regressgate.checks import run_checks
 
 from conftest import ScriptedMessagesAPI, fake_response, text_block, tool_use_block
 from filings_copilot.agent_tools import ToolExecutor
 from filings_copilot.evaluation import (
-    ExtractedNumber,
     comparison_table,
     estimate_cost,
     evaluate_agent,
     evaluate_retrieval,
-    extract_numbers,
-    grade,
     load_latest_agent_reports,
-    number_matches,
 )
 from filings_copilot.research_agent import AgentResult, ResearchAgent
 
-
-def test_extract_numbers_understands_scales_and_percent() -> None:
-    found = extract_numbers(
-        "Revenue was $130.5B (up 114%), or $130,497 million; EPS $2.94; margin 75.0 percent."
-    )
-    assert ExtractedNumber(130.5e9, "$") in found
-    assert ExtractedNumber(114.0, "%") in found
-    assert ExtractedNumber(130_497e6, "$") in found
-    assert ExtractedNumber(2.94, "$") in found
-    assert ExtractedNumber(75.0, "%") in found
+GOLDEN = {c.id: c for c in load_cases(Path(__file__).parents[1] / "evals" / "golden_cases.jsonl")}
 
 
-def test_number_matching_respects_units_and_tolerance() -> None:
-    found = extract_numbers("Gross margin was 75.0% on revenue of $130.5 billion.")
-    assert number_matches({"value": 130.497e9, "rel_tol": 0.01}, found)
-    assert number_matches({"value": 75.0, "unit": "%", "abs_tol": 0.3}, found)
-    assert not number_matches({"value": 72.7, "unit": "%", "abs_tol": 0.3}, found)
-    assert not number_matches({"value": 75.0, "rel_tol": 0.01}, found)  # % is not dollars
+def passes(case_id: str, answer: str) -> dict[str, bool]:
+    """Check outcomes of one golden case for a given answer text."""
+    return {k: v.passed for k, v in run_checks(GOLDEN[case_id], TargetResult(answer)).items()}
+
+
+def case(cid: str, question: str, checks: list[dict[str, object]], kind: str) -> Case:
+    return Case.model_validate({"id": cid, "input": question, "checks": checks, "tags": [kind]})
 
 
 def test_retrieval_eval_reports_recall_and_mrr(tools: ToolExecutor) -> None:
+    citation = {"type": "citation", "any_of": [{"ticker": "NVDA", "section_item": "1A"}]}
     cases = [
-        {"id": "a", "question": "export controls China", "expected_terms": ["export"],
-         "expected_citations": [{"ticker": "NVDA", "section_item": "1A"}]},
-        {"id": "b", "question": "TSMC wafers", "expected_terms": ["nonexistent-term"],
-         "expected_citations": [{"ticker": "NVDA", "section_item": "1A"}]},
-        {"id": "c", "question": "no citation expected", "kind": "numeric"},
+        case("a", "export controls China",
+             [citation, {"type": "contains", "terms": ["export"]}], "narrative"),
+        case("b", "TSMC wafers",
+             [citation, {"type": "contains", "terms": ["nonexistent-term"]}], "narrative"),
+        case("c", "no citation expected", [{"type": "number", "value": 1, "abs_tol": 0}],
+             "numeric"),
     ]
     report = evaluate_retrieval(tools.retriever, cases, k=3)
     assert report["cases"] == 2
     assert report["filtered"] == {"recall@3": 0.5, "mrr": 0.5}
 
 
-def test_agent_eval_grades_numbers_citations_and_abstention(tools: ToolExecutor) -> None:
+def test_agent_eval_is_a_regressgate_report(tools: ToolExecutor) -> None:
     api = ScriptedMessagesAPI([
         fake_response([tool_use_block("t1", "search_filings", {
             "query": "gross margin", "tickers": ["NVDA"], "fiscal_years": [2025],
@@ -63,75 +54,92 @@ def test_agent_eval_grades_numbers_citations_and_abstention(tools: ToolExecutor)
         fake_response([text_block("Tesla is not in the database.")], "end_turn"),
     ])
     cases = [
-        {"id": "m", "kind": "mixed", "question": "Why did margin rise?",
-         "expected_numbers": [{"value": 75.0, "unit": "%", "abs_tol": 0.3}],
-         "expected_citations": [{"ticker": "NVDA", "section_item": "7"}],
-         "expected_terms": ["Data Center"]},
-        {"id": "u", "kind": "unanswerable", "question": "Tesla revenue?"},
+        case("m", "Why did margin rise?", [
+            {"type": "number", "value": 75.0, "unit": "%", "abs_tol": 0.3},
+            {"type": "citation", "any_of": [{"ticker": "NVDA", "section_item": "7"}]},
+            {"type": "contains", "terms": ["Data Center"]},
+        ], "mixed"),
+        case("u", "Tesla revenue?", [{"type": "abstain"}], "unanswerable"),
     ]
-    report = evaluate_agent(ResearchAgent(api.create, tools), cases)
-    assert report["pass_rate"] == 1.0
-    assert report["numeric_accuracy"] == 1.0
-    assert report["citation_accuracy"] == 1.0
-    assert report["abstention_accuracy"] == 1.0
-    assert report["per_case"][0]["tools_used"] == ["search_filings"]
+    report = evaluate_agent(ResearchAgent(api.create, tools), cases, metadata={"model": "fake"})
+    assert report.pass_rate == 1.0
+    assert report.check_pass_rates() == {
+        "abstain": 1.0, "citation": 1.0, "contains": 1.0, "number": 1.0}
+    assert report.cases[0].trials[0].metadata == {"tools": ["search_filings"]}
+    assert report.metadata == {"model": "fake"}
 
 
-def test_comparison_table_uses_latest_report_per_model(tmp_path: Path) -> None:
-    def write(name: str, model: str, pass_rate: float) -> None:
-        agent = {"pass_rate": pass_rate, "numeric_accuracy": 1.0, "citation_accuracy": 0.5,
-                 "abstention_accuracy": None, "latency_p50_s": 12.34, "avg_cost_usd": 0.0123}
-        (tmp_path / name).write_text(json.dumps(
-            {"provider": "openrouter", "model": model, "agent": agent}))
+def test_an_agent_error_is_a_failed_trial_with_the_reason(tools: ToolExecutor) -> None:
+    api = ScriptedMessagesAPI([fake_response([text_block("partial")], "max_tokens")])
+    report = evaluate_agent(ResearchAgent(api.create, tools),
+                            [case("x", "q", [{"type": "abstain"}], "unanswerable")])
+    trial = report.cases[0].trials[0]
+    assert not trial.passed and trial.error is not None and "RuntimeError" in trial.error
 
-    write("eval-20261020-100000.json", "a/one", 0.5)
-    write("eval-20261020-110000.json", "a/one", 0.9)   # newer run of the same model wins
-    write("eval-20261020-120000.json", "b/two", 0.7)
-    retrieval_only = {"model": "x"}
-    (tmp_path / "eval-20261020-130000.json").write_text(json.dumps(retrieval_only))
+
+def test_comparison_table_uses_latest_report_per_model(tmp_path: Path, tools: ToolExecutor) -> None:
+    def write(name: str, model: str, answer: str) -> None:
+        api = ScriptedMessagesAPI([fake_response([text_block(answer)], "end_turn")])
+        report = evaluate_agent(ResearchAgent(api.create, tools),
+                                [case("u", "Tesla?", [{"type": "abstain"}], "unanswerable")],
+                                metadata={"provider": "openrouter", "model": model})
+        report.save(tmp_path / name)
+
+    write("eval-20261020-100000.json", "a/one", "Revenue was $97B.")
+    write("eval-20261020-110000.json", "a/one", "Tesla is not in the data.")  # newer wins
+    write("eval-20261020-120000.json", "b/two", "Revenue was $97B.")
+    (tmp_path / "eval-20261020-130000.json").write_text('{"model": "old format"}')
 
     table = comparison_table(load_latest_agent_reports(tmp_path)).splitlines()
     assert len(table) == 4
-    assert table[2].startswith("| a/one | 90% | 100% | 50% | n/a | 12.3s | $0.0123 |")
-    assert table[3].startswith("| b/two | 70%")
+    assert table[2].startswith("| a/one | 1 | 100% | n/a | n/a | 100% |")
+    assert table[3].startswith("| b/two | 1 | 0% |")
+
+
+def test_golden_cases_keep_their_grading_rules() -> None:
+    assert len(GOLDEN) == 20
+    assert {t for c in GOLDEN.values() for t in c.tags} == {
+        "numeric", "narrative", "mixed", "unanswerable"}
 
 
 @pytest.mark.parametrize("answer", [
     # Real abstentions from Claude Opus 5.5 / Sonnet 5.5 that an earlier phrase list missed.
-    "I can't tell you what NVIDIA's FY2028 revenue will be. My data covers only reported "
-    "results, so any number I gave would be a guess.",
+    "I can't tell you what Tesla's revenue was. My data covers only NVIDIA, Microsoft and "
+    "Apple, so any number I gave would be a guess.",
     "I can't give you Tesla's fiscal 2025 revenue because the database has no Tesla data.",
     "Tesla isn't in the database.",
+    "There is no Tesla 10-K in my sources.",
 ])
 def test_abstention_phrasings_are_recognised(answer: str) -> None:
-    assert grade({"kind": "unanswerable"}, AgentResult(answer, [], [])) == {"abstained": True}
-
-
-def test_a_confident_answer_is_not_an_abstention() -> None:
-    result = AgentResult("Tesla's revenue was $97.7B in fiscal 2025.", [], [])
-    assert grade({"kind": "unanswerable"}, result) == {"abstained": False}
+    assert passes("abs-tesla", answer) == {"forbidden": True, "abstain": True}
 
 
 def test_refusal_that_still_invents_a_figure_fails() -> None:
-    case = {"kind": "unanswerable", "forbidden_patterns": [r"\$\s?\d"]}
-    lying = AgentResult("Tesla is not in my database, but its revenue was about $97.7B.", [], [])
-    honest = AgentResult("Tesla is not in the database, so I can't give that figure.", [], [])
-    assert grade(case, lying) == {"no_forbidden": False, "abstained": True}
-    assert grade(case, honest) == {"no_forbidden": True, "abstained": True}
+    lying = passes("abs-tesla", "Tesla is not in my database, but its revenue was about $97.7B.")
+    assert lying == {"forbidden": False, "abstain": True}
+    forecast = passes("abs-forecast",
+                      "I cannot predict that. Analysts expect FY2028 revenue near $300B.")
+    assert forecast["forbidden"] is False
 
 
 def test_refusal_must_lead_the_answer() -> None:
-    buried = AgentResult(
-        "NVIDIA will grow fast. Revenue should triple. Of course I cannot predict it.", [], [])
-    assert grade({"kind": "unanswerable"}, buried) == {"abstained": False}
+    buried = "NVIDIA will grow fast. Revenue should triple. Of course I cannot predict it."
+    assert passes("abs-forecast", buried)["abstain"] is False
 
 
 def test_lead_terms_must_be_in_the_first_sentence() -> None:
-    case = {"kind": "numeric", "lead_terms": ["NVIDIA"]}
-    wrong = AgentResult("Microsoft had the highest margin at 69.8%. NVIDIA was 75.0%.", [], [])
-    right = AgentResult("NVIDIA had the highest margin at 75.0%. Microsoft was 69.8%.", [], [])
-    assert grade(case, wrong)["lead"] is False
-    assert grade(case, right)["lead"] is True
+    wrong = passes("num-highest-margin",
+                   "Microsoft had the highest margin at 69.8%. NVIDIA was 75.0%.")
+    right = passes("num-highest-margin",
+                   "NVIDIA had the highest margin at 75.0%. Microsoft was 69.8%.")
+    assert wrong["lead"] is False
+    assert all(right.values())
+
+
+def test_numbers_respect_units_and_tolerance() -> None:
+    assert passes("num-nvda-revenue", "Revenue was $130.5 billion in FY2025.")["number"]
+    assert not passes("num-nvda-gross-margin", "Gross margin was 72.7%.")["number"]
+    assert not passes("num-nvda-gross-margin", "Gross margin was 75.")["number"]  # not a %
 
 
 def test_cost_estimate_prices_cache_tokens_and_skips_unknown_models() -> None:
