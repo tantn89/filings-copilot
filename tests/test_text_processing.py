@@ -74,3 +74,27 @@ def test_split_sections_folds_running_page_headers() -> None:
     assert sections["1"].count("Demand for cloud") == 50
     assert "PART I" not in sections["1A"]
     assert "Item 2" not in sections["1A"]
+
+
+def test_table_cells_stay_separate_and_currency_cells_rejoin() -> None:
+    html = ("<table><tr><td>Revenue</td><td>$</td><td>130,497</td><td></td>"
+            "<td>$</td><td>60,922</td></tr><tr><td>Gross margin</td><td>75.0</td><td>%</td>"
+            "<td>(1,234</td><td>)</td></tr></table>")
+    assert html_to_text(html).splitlines() == [
+        "Revenue | $130,497 | $60,922", "Gross margin | 75.0% | (1,234)"]
+
+
+def test_hard_wrapped_source_lines_are_not_headings() -> None:
+    body = "Revenue grew strongly this year. " * 80
+    html = (f"<p>Item 7. Management's Discussion</p><p>{body} As described in\n"
+            f"Item 1A. Risk Factors, demand may fall. {body}</p><p>Item 8. Financial</p>")
+    sections = split_sections(html_to_text(html))
+    assert [s.item for s in sections] == ["7"]
+    assert "demand may fall" in sections[0].text
+
+
+def test_last_section_stops_at_the_signature_page() -> None:
+    body = "Market risk discussion. " * 120
+    text = f"Item 7A. Market Risk\n{body}\nSIGNATURES\n" + "Exhibit text. " * 300
+    (section,) = split_sections(text)
+    assert "Exhibit text" not in section.text
