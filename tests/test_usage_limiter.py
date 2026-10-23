@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -81,3 +83,15 @@ def test_agent_failures_reach_the_client_without_internal_details(tools: ToolExe
         body = "".join(r.iter_text())
     assert "event: error" in body and "internal error (ref " in body
     assert "secret-looking" not in body
+
+
+def test_each_question_is_logged_with_its_client(
+    tools: ToolExecutor, caplog: pytest.LogCaptureFixture
+) -> None:
+    api = ScriptedMessagesAPI([fake_response([text_block("ok")], "end_turn")])
+    runtime = Runtime(store=tools.store, agent=ResearchAgent(api.create, tools))
+    client = TestClient(create_app(runtime, Settings()))
+    with caplog.at_level(logging.INFO, logger="filings_copilot.api"):
+        client.post("/ask", json={"question": "q??"},
+                    headers={"x-forwarded-for": "9.9.9.9, 203.0.113.7"})
+    assert "question client=203.0.113.7 forwarded_entries=2" in caplog.text

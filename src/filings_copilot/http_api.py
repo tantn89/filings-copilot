@@ -38,7 +38,18 @@ def _client_id(request: Request, trusted_hops: int) -> str:
     return request.client.host if request.client else "unknown"
 
 
+def _configure_logging() -> None:
+    """uvicorn only configures its own loggers; without this, app INFO lines are dropped."""
+    app_logger = logging.getLogger("filings_copilot")
+    if not app_logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+        app_logger.addHandler(handler)
+        app_logger.setLevel(logging.INFO)
+
+
 def create_app(runtime: Runtime | None = None, settings: Settings | None = None) -> FastAPI:
+    _configure_logging()
     settings = settings or get_settings()
     runtime = runtime or build_runtime(settings)
     limiter = UsageLimiter(settings.demo_questions_per_hour, settings.demo_daily_question_cap)
