@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     HF_HOME=/app/.cache/huggingface \
     HF_HUB_DISABLE_TELEMETRY=1
 
-# uid 1000 matches the user Hugging Face Spaces runs containers as.
+# Run as an unprivileged user; the app only reads its baked-in data at runtime.
 RUN useradd --create-home --uid 1000 app
 WORKDIR /app
 
