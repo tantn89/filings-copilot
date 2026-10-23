@@ -16,6 +16,8 @@ filing text with hybrid search, and answers with citations that link to the sour
 > The public demo runs Claude Sonnet 5.5 and is capped at 50 questions a day; if the cap
 > is reached, run it locally with your own key.
 
+![Answer with cited 10-K passages and the evidence panel](docs/demo-answer-with-evidence.png)
+
 ---
 
 ## Why this exists
