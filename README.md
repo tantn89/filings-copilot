@@ -7,7 +7,7 @@ pulls the figure from audited XBRL data with SQL, finds management's explanation
 filing text with hybrid search, and answers with citations that link to the source filing.
 
 ![ci](https://github.com/tantn89/filings-copilot/actions/workflows/ci.yml/badge.svg)
-![python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
+![python](https://img.shields.io/badge/python-3.12-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
 > **Live demo: [filings-copilot.vercel.app](https://filings-copilot.vercel.app)** ·
