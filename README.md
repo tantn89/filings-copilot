@@ -74,9 +74,8 @@ Median query latency ~200 ms on a laptop CPU (embedding + BM25 + vector scan).
 
 **Failure analysis.** The one miss is a two-part question: *"Which manufacturing partners
 does NVIDIA depend on, and what supply chain risks does it flag?"* "TSMC" appears only in
-Item 1, while one combined query ranks Item 1A risk passages higher. The agent can recover
-by issuing two searches; the retrieval benchmark deliberately keeps the hard case to
-measure whether query decomposition helps.
+Item 1, while one combined query ranks Item 1A risk passages higher. The retrieval benchmark
+deliberately keeps this hard case; the agent eval below shows both models recover from it.
 
 ### End-to-end agent (`filings-copilot eval`)
 
@@ -85,8 +84,28 @@ measure whether query decomposition helps.
 on abstaining). Grading is deterministic: no LLM judge, so a score change means the
 system changed, not the grader.
 
-_Not yet published. Requires an Anthropic API key; the run reports pass rate by kind,
-numeric / citation / abstention accuracy, p50/p95 latency and cost per question._
+| Model | Pass rate | Numeric | Citation | Abstain | p50 latency | p95 latency | Cost / question |
+|---|---|---|---|---|---|---|---|
+| Claude Opus 5.5 | 20/20 | 100% | 100% | 100% | 11.5 s | 25.8 s | $0.068 |
+| Claude Sonnet 5.5 | 20/20 | 100% | 100% | 100% | 5.5 s | 10.0 s | $0.030 |
+
+Run on 2026-10-23, effort `medium`, cost upper bound at list prices (prompt caching makes
+real spend lower). Reproduce with `filings-copilot eval --model <id>` then
+`filings-copilot eval-report`.
+
+What the runs show:
+- **Same accuracy, half the cost and latency.** On this task Sonnet 5.5 matches Opus 5.5,
+  so the public demo runs on Sonnet and Opus stays the default for local research.
+- **The TSMC case is solved by the agent, not the retriever.** Opus split the two-part
+  question into three searches; Sonnet rewrote it into one better query. Either way the
+  answer cites Item 1 and names TSMC.
+- **The first run scored 95% for both models, and the grader was wrong, not the agents.**
+  Both "failures" were correct refusals worded in ways the abstention phrase list missed
+  (*"I can't tell you what NVIDIA's FY2028 revenue will be… any number I gave would be a
+  guess"*). The phrases were added as regression tests before re-running.
+- **20 questions saturate quickly.** 100% here means the pipeline is sound, not that it
+  is finished; the next step is a larger, harder set (multi-company comparisons,
+  restated figures, trick questions on fiscal-year boundaries).
 
 ## Design decisions
 
@@ -195,7 +214,8 @@ evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
 
 - [x] Next.js UI (`web/`): live tool trace with the exact SQL, citation chips linked to
       source passages and SEC.gov, shareable `/?q=` question links
-- [ ] Publish full agent eval; compare effort levels (cost vs. accuracy)
+- [x] Publish full agent eval across models (Opus 5.5 vs Sonnet 5.5)
+- [ ] Harder golden set (50+ questions) and an effort-level sweep
 - [ ] Query decomposition for multi-part questions (target: the TSMC miss)
 - [ ] Deploy: API on Cloud Run, UI on Vercel
 - [ ] OpenTelemetry traces per tool call
