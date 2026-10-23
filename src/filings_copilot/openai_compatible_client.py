@@ -97,21 +97,32 @@ def from_chat_response(payload: dict[str, Any]) -> SimpleNamespace:
     content: list[SimpleNamespace] = []
     if message.get("content"):
         content.append(SimpleNamespace(type="text", text=message["content"]))
-    for call in message.get("tool_calls") or []:
+    seen_ids: set[str] = set()
+    for index, call in enumerate(message.get("tool_calls") or []):
         raw = call["function"].get("arguments") or "{}"
         try:
             tool_input = json.loads(raw)
         except json.JSONDecodeError:
+            tool_input = None
+        if not isinstance(tool_input, dict):
             # Pass the bad payload through; the tool executor rejects it and the model
             # sees an error result it can correct on the next turn.
             tool_input = {"_invalid_json": raw}
+        # Some providers omit or repeat call ids; results are matched back by id.
+        call_id = call.get("id") or ""
+        if not call_id or call_id in seen_ids:
+            call_id = f"call_{index}_{len(seen_ids)}"
+        seen_ids.add(call_id)
         content.append(SimpleNamespace(
-            type="tool_use", id=call["id"], name=call["function"]["name"], input=tool_input
+            type="tool_use", id=call_id, name=call["function"]["name"], input=tool_input
         ))
     usage = payload.get("usage") or {}
+    has_tool_calls = any(block.type == "tool_use" for block in content)
     return SimpleNamespace(
         content=content,
-        stop_reason=_STOP_REASONS.get(choice.get("finish_reason") or "stop", "end_turn"),
+        # Trust the tool calls over finish_reason: some providers report "stop" with them.
+        stop_reason="tool_use" if has_tool_calls
+        else _STOP_REASONS.get(choice.get("finish_reason") or "stop", "end_turn"),
         model=payload.get("model"),
         usage=SimpleNamespace(
             input_tokens=usage.get("prompt_tokens", 0),

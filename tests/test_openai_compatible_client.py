@@ -99,3 +99,18 @@ def test_provider_error_inside_200_response_raises() -> None:
 def test_requires_api_key() -> None:
     with pytest.raises(ValueError):
         OpenAICompatibleMessages("")
+
+
+def test_tool_calls_win_over_finish_reason_and_ids_are_made_unique() -> None:
+    from filings_copilot.openai_compatible_client import from_chat_response
+
+    def call(id_: str, args: str) -> dict[str, Any]:
+        return {"id": id_, "type": "function",
+                "function": {"name": "list_companies", "arguments": args}}
+
+    reply = from_chat_response(chat_reply(finish="stop", tool_calls=[
+        call("", "{}"), call("dup", "[]"), call("dup", "{}")]))
+    assert reply.stop_reason == "tool_use"
+    ids = [b.id for b in reply.content if b.type == "tool_use"]
+    assert len(set(ids)) == 3 and all(ids)
+    assert reply.content[1].input == {"_invalid_json": "[]"}  # a JSON list is not tool input
