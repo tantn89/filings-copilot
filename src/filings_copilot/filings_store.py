@@ -7,7 +7,8 @@ financial metrics, full-text BM25 search (fts extension) and vector similarity
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -118,22 +119,35 @@ class FilingsStore:
         ).fetchone()
         return bool(row and row[0])
 
+    @contextmanager
+    def _transaction(self) -> Iterator[None]:
+        """Delete-then-insert must not leave a filing or ticker empty if the insert fails."""
+        self.conn.begin()
+        try:
+            yield
+        except BaseException:
+            self.conn.rollback()
+            raise
+        self.conn.commit()
+
     def replace_chunks(self, accession_number: str, chunks: Sequence[ChunkRecord]) -> None:
-        self.conn.execute("DELETE FROM chunks WHERE accession_number = ?", [accession_number])
-        self.conn.executemany(
-            "INSERT INTO chunks VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [[c.chunk_id, c.accession_number, c.ticker, c.fiscal_year, c.section_item,
-              c.section_title, c.position, c.text, c.embedding] for c in chunks],
-        )
+        with self._transaction():
+            self.conn.execute("DELETE FROM chunks WHERE accession_number = ?", [accession_number])
+            self.conn.executemany(
+                "INSERT INTO chunks VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [[c.chunk_id, c.accession_number, c.ticker, c.fiscal_year, c.section_item,
+                  c.section_title, c.position, c.text, c.embedding] for c in chunks],
+            )
 
     def replace_metrics(self, ticker: str, rows: Iterable[MetricRow]) -> int:
-        self.conn.execute("DELETE FROM annual_financials WHERE ticker = ?", [ticker])
         values = [[r.ticker, r.metric, r.fiscal_year, r.period_start, r.period_end, r.value,
                    r.unit, r.concept, r.accession_number, r.filed] for r in rows]
-        if values:
-            self.conn.executemany(
-                "INSERT INTO annual_financials VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", values
-            )
+        with self._transaction():
+            self.conn.execute("DELETE FROM annual_financials WHERE ticker = ?", [ticker])
+            if values:
+                self.conn.executemany(
+                    "INSERT INTO annual_financials VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", values
+                )
         return len(values)
 
     def rebuild_text_index(self) -> None:

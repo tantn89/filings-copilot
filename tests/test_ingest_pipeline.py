@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import duckdb
 import httpx
+import pytest
 
 from filings_copilot.edgar_client import EdgarClient
 from filings_copilot.embeddings import HashingEmbedder
-from filings_copilot.filings_store import FilingsStore
+from filings_copilot.filings_store import ChunkRecord, FilingsStore
 from filings_copilot.hybrid_retriever import HybridRetriever
 from filings_copilot.ingest_pipeline import ingest
 from test_edgar_client import SUBMISSIONS
@@ -49,3 +51,33 @@ def test_ingest_end_to_end_is_idempotent() -> None:
     assert again.filings == 0 and again.skipped_filings == 1
     count = store.cursor().execute("SELECT count(*) FROM chunks").fetchone()
     assert count is not None and count[0] == report.chunks
+
+
+def test_one_failing_filing_does_not_stop_the_ingest() -> None:
+    def flaky(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/d.htm"):  # the FY2024 10-K document
+            return httpx.Response(404)
+        return edgar_handler(request)
+
+    embedder = HashingEmbedder(64)
+    store = FilingsStore(":memory:", embedder.dimension)
+    edgar = EdgarClient("t t@example.com", 1000, transport=httpx.MockTransport(flaky))
+
+    report = ingest(["NVDA"], {2024, 2025}, edgar, store, embedder, 120, 20)
+    assert report.filings == 1
+    assert any("FY2024: failed" in w for w in report.warnings)
+    # The index was rebuilt, so the filing that did load is searchable.
+    assert HybridRetriever(store, embedder).search("export controls")
+
+
+def test_failed_replace_keeps_the_previous_chunks() -> None:
+    embedder = HashingEmbedder(8)
+    store = FilingsStore(":memory:", embedder.dimension)
+    vec = embedder.embed_query("x")
+    good = ChunkRecord("A-2025-7-0000", "acc", "A", 2025, "7", "MD&A", 0, "old text", vec)
+    store.replace_chunks("acc", [good])
+    duplicate_ids = [good, good]  # violates the primary key mid-insert
+    with pytest.raises(duckdb.Error):
+        store.replace_chunks("acc", duplicate_ids)
+    rows = store.cursor().execute("SELECT text FROM chunks").fetchall()
+    assert rows == [("old text",)]
