@@ -92,11 +92,13 @@ system changed, not the grader.
 
 | Model | Pass rate | Numeric | Citation | Abstain | p50 latency | p95 latency | Cost / question |
 |---|---|---|---|---|---|---|---|
-| Claude Opus 5.5 | 20/20 | 100% | 100% | 100% | 11.5 s | 25.8 s | $0.068 |
-| Claude Sonnet 5.5 | 20/20 | 100% | 100% | 100% | 5.5 s | 10.0 s | $0.030 |
+| Claude Opus 5.5 | 20/20 | 100% | 100% | 100% | 11.5 s | 25.8 s | ≤ $0.068* |
+| Claude Sonnet 5.5 (production) | 20/20 | 100% | 100% | 100% | 5.2 s | 10.8 s | $0.010 |
 
-Run on 2026-10-23, effort `medium`, cost upper bound at list prices (prompt caching makes
-real spend lower). Reproduce with `filings-copilot eval --model <id>` then
+Effort `medium`. The Sonnet row is the latest run (2026-10-23, after the review fixes,
+with stricter grading and cost priced from cached vs. uncached tokens). \*The Opus row is
+an earlier run of the same day whose cost treats every input token at the full price, an
+upper bound; its accuracy was graded before the grader was tightened. Reproduce with `filings-copilot eval --model <id>` then
 `filings-copilot eval-report`.
 
 What the runs show:
