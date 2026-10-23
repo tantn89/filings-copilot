@@ -55,6 +55,18 @@ The in-process caps reset on every instance restart. The real bound is the provi
 - **OpenRouter**: a credit limit on the key, if the OpenRouter provider is used.
 - **GCP**: a billing budget alert on the project covers Cloud Run and Cloud Build.
 
+## Eval gate in GitHub Actions
+
+| Field | Route |
+|---|---|
+| When to use | Before merging a prompt, model, tool or retrieval change |
+| Scope | Repository `tantn89/filings-copilot`; workflow `.github/workflows/eval-gate.yml` |
+| How to run | Actions tab, `eval-gate`, Run workflow; or add the `run-evals` label to a pull request |
+| Access | An `ANTHROPIC_API_KEY` repository secret (Settings, Secrets and variables, Actions). The workflow stops with an error when it is missing |
+| Data | The workflow downloads `filings.duckdb` from the `v0.1.0` release assets. After a re-ingest, upload the new file there (`gh release upload v0.1.0 data/filings.duckdb --clobber`) and refresh the baseline |
+| Limits | About $0.01 per question per trial; the default 3 trials over 20 questions cost about $0.60 per run |
+| Verify | The job summary and the PR comment show the verdict. Refresh the baseline with `regressgate run --out evals/baseline.json` and commit it in the same pull request as the change it reflects |
+
 ## Rollback
 
 - API: list revisions with

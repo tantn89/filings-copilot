@@ -88,7 +88,9 @@ deliberately keeps this hard case; the agent eval below shows both models recove
 20 golden questions: 10 numeric (graded against XBRL with tolerances), 7 narrative +
 1 mixed (graded on citation to the right section and key terms), 2 unanswerable (graded
 on abstaining). Grading is deterministic: no LLM judge, so a score change means the
-system changed, not the grader.
+system changed, not the grader. The cases (`evals/golden_cases.jsonl`) and the runner are
+[regressgate](https://github.com/tantn89/regressgate), which repeats every question and
+gates changes statistically (see [Eval gate](#eval-gate-repeats-reveal-what-one-run-hides)).
 
 | Model | Pass rate | Numeric | Citation | Abstain | p50 latency | p95 latency | Cost / question |
 |---|---|---|---|---|---|---|---|
@@ -99,7 +101,7 @@ Effort `medium`. The Sonnet row is the latest run (2026-10-23, after the review 
 with stricter grading and cost priced from cached vs. uncached tokens). \*The Opus row is
 an earlier run of the same day whose cost treats every input token at the full price, an
 upper bound; its accuracy was graded before the grader was tightened. Reproduce with `filings-copilot eval --model <id>` then
-`filings-copilot eval-report`.
+`filings-copilot eval-report`; add `--repeats 3` to measure noise.
 
 What the runs show:
 - **Same accuracy, half the cost and latency.** On this task Sonnet 5.5 matches Opus 5.5,
@@ -114,6 +116,26 @@ What the runs show:
 - **20 questions saturate quickly.** 100% here means the pipeline is sound, not that it
   is finished; the next step is a larger, harder set (multi-company comparisons,
   restated figures, trick questions on fiscal-year boundaries).
+
+### Eval gate: repeats reveal what one run hides
+
+Running each question 3 times (`regressgate run`, Sonnet 5.5, 60 trials, $0.61) gives
+**98.3%**, not 100%: `abs-forecast` passed 2 of 3 trials. In the failing trial Sonnet
+refused correctly ("Any number I gave you would be a guess") and then offered a scenario
+anyway: *"Growth of 20% a year would give roughly $311B in FY2028."* A forecast with a
+dollar figure is exactly what that case forbids. A single run had scored 20/20 and missed
+it.
+
+That run is the committed baseline (`evals/baseline.json`). The
+[`eval-gate`](.github/workflows/eval-gate.yml) workflow re-runs the suite on demand (or on a
+pull request labelled `run-evals`) and fails only when regressgate finds a statistically
+real drop, so this flaky refusal does not turn every prompt change red, while a question
+that breaks for good does. Locally:
+
+```bash
+pip install -e ".[eval]"
+regressgate run --out head.json && regressgate compare evals/baseline.json head.json
+```
 
 ## Design decisions
 
@@ -180,7 +202,7 @@ The UI reads the API from `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8000`
 Tests run fully offline (fake Claude client, hashing embedder, mocked EDGAR, in-memory DuckDB):
 
 ```bash
-pytest --cov=filings_copilot    # 119 tests, 89% coverage
+pytest --cov=filings_copilot    # 120 tests
 ruff check src tests && mypy    # strict typing
 ```
 
@@ -236,9 +258,11 @@ src/filings_copilot/
   sql_guard.py               AST-based read-only SQL validation
   agent_tools.py             tool schemas (strict) + executors
   research_agent.py          Claude tool-use loop emitting events
-  evaluation.py              deterministic retrieval + agent grading
+  evaluation.py              retrieval metrics + agent runs as regressgate reports
+  regressgate_target.py      the agent as a regressgate target (regressgate.yaml)
   http_api.py / cli.py       FastAPI + Typer entry points
-evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
+evals/golden_cases.jsonl      20 regressgate cases with XBRL ground truth
+evals/baseline.json           committed baseline for the eval gate (3 trials per case)
 ```
 
 Product rules, architecture decisions, standards and the deploy runbook are in [`docs/`](docs/README.md).

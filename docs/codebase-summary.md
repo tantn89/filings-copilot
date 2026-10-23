@@ -13,7 +13,8 @@ lists the modules.
 | Settings and every `FILINGS_*` variable | `src/filings_copilot/config.py` (`Settings`); example values in `.env.example` |
 | Web UI | `web/app/page.tsx` |
 | Cloud Run deploy | `scripts/deploy_cloud_run.py` |
-| Golden questions | `evals/golden_questions.jsonl` |
+| Golden cases (regressgate format) | `evals/golden_cases.jsonl` |
+| Agent eval gate | `regressgate.yaml`, `src/filings_copilot/regressgate_target.py`, `.github/workflows/eval-gate.yml`; baseline `evals/baseline.json` |
 
 ## Where each concern lives
 
@@ -31,7 +32,7 @@ lists the modules.
 | Agent loop, citations, stop reasons | `research_agent.py` | `test_research_agent.py` |
 | OpenRouter adapter | `openai_compatible_client.py` | `test_openai_compatible_client.py` |
 | Demo limits, client identity, error redaction | `usage_limiter.py`, `http_api.py` | `test_usage_limiter.py`, `test_http_api.py` |
-| Grading and cost | `evaluation.py` | `test_evaluation.py` |
+| Retrieval metrics, agent runs, cost | `evaluation.py` (grading itself is regressgate checks) | `test_evaluation.py` |
 | SSE client and event normalisation | `web/lib/agent-api-client.ts`, `web/lib/agent-types.ts` | `npm run lint` (type check) and `npm run build` |
 | Answer formatting and citation links | `web/lib/format.ts` | same |
 
@@ -41,6 +42,6 @@ Shared test doubles (hashing embedder, in-memory store, scripted Claude client) 
 ## Local state that is not in git
 
 - `data/filings.duckdb`: built by `filings-copilot ingest`, shipped in the image.
-- `evals/results/`: one JSON report per eval run, read by `eval-report`.
+- `evals/results/`: one regressgate report per `filings-copilot eval` run, read by `eval-report`.
 - `.env`: local credentials.
 - `plans/`: working plans and review reports.
