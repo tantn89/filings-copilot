@@ -1,0 +1,52 @@
+name: eval-gate
+
+# Live agent evals cost LLM credits (about $0.01 per question per trial), so they run on
+# demand: manually, or on a pull request when it gets the `run-evals` label.
+on:
+  workflow_dispatch:
+    inputs:
+      repeats:
+        description: Trials per question
+        default: "3"
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: eval-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'run-evals'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      FILINGS_LLM_PROVIDER: anthropic
+      FILINGS_LLM_MODEL: claude-sonnet-5-5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Check the API key secret is set
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add an ANTHROPIC_API_KEY repository secret to run the eval gate."
+            exit 1
+          fi
+      - run: pip install -c constraints.txt -e ".[eval]"
+      - name: Fetch the pre-built filings database
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v0.1.0 --pattern filings.duckdb --dir data
+      - uses: tantn89/regressgate@4cd1091e6d82c10d56c3c275c7d9b49f2c35acaa
+        with:
+          install: regressgate @ git+https://github.com/tantn89/regressgate@4cd1091e6d82c10d56c3c275c7d9b49f2c35acaa
+          baseline: evals/baseline.json
+          repeats: ${{ inputs.repeats || '3' }}

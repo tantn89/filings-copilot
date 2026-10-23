@@ -1,0 +1,1637 @@
+{
+  "schema_version": 1,
+  "regressgate_version": "0.1.0",
+  "created_at": "2026-10-23T13:50:13+00:00",
+  "target": "filings_copilot.regressgate_target:answer",
+  "repeats": 3,
+  "metadata": {},
+  "cases": [
+    {
+      "id": "num-nvda-revenue",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.305e+11$"
+            }
+          },
+          "latency_s": 5.101514100009808,
+          "cost_usd": 0.005793100000000001,
+          "input_tokens": 3045,
+          "output_tokens": 141,
+          "error": null,
+          "output": "NVIDIA's total revenue was **$130.5B in FY2025**. That is the fiscal year that ended January 26, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.305e+11$"
+            }
+          },
+          "latency_s": 5.345557900000131,
+          "cost_usd": 0.0059451,
+          "input_tokens": 3066,
+          "output_tokens": 152,
+          "error": null,
+          "output": "NVIDIA's total revenue was **$130.5B in FY2025**. That is the fiscal year from January 29, 2024 to January 26, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.305e+11$"
+            }
+          },
+          "latency_s": 3.7308605999860447,
+          "cost_usd": 0.0029251999999999998,
+          "input_tokens": 3066,
+          "output_tokens": 152,
+          "error": null,
+          "output": "NVIDIA's total revenue was **$130.5B in FY2025**. That is the fiscal year from January 29, 2024 to January 26, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-nvda-growth",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 114.2%"
+            }
+          },
+          "latency_s": 3.9857183000131045,
+          "cost_usd": 0.0036192,
+          "input_tokens": 3188,
+          "output_tokens": 197,
+          "error": null,
+          "output": "NVIDIA's revenue grew about 114.2% from fiscal 2024 to fiscal 2025. It rose from $60.9B in FY2024 to $130.5B in FY2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 114.2%"
+            }
+          },
+          "latency_s": 4.597725300001912,
+          "cost_usd": 0.0036192,
+          "input_tokens": 3188,
+          "output_tokens": 197,
+          "error": null,
+          "output": "NVIDIA's revenue grew about 114.2% from fiscal 2024 to fiscal 2025. It rose from $60.9B in FY2024 to $130.5B in FY2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 114.2%"
+            }
+          },
+          "latency_s": 3.837781200010795,
+          "cost_usd": 0.0036371999999999997,
+          "input_tokens": 3192,
+          "output_tokens": 198,
+          "error": null,
+          "output": "NVIDIA's revenue grew about 114.2% from fiscal 2024 to fiscal 2025. It rose from $60.9B in FY2024 to $130.5B in FY2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-nvda-gross-margin",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            }
+          },
+          "latency_s": 4.122919599991292,
+          "cost_usd": 0.0038632,
+          "input_tokens": 3200,
+          "output_tokens": 219,
+          "error": null,
+          "output": "NVIDIA's gross margin in fiscal 2025 (the year ended January 26, 2025) was about 75.0%. Gross profit was $97.86B on revenue of $130.50B. I worked out the percentage by hand from those two figures, not in SQL.\n\nCost of revenue was $32.64B.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            }
+          },
+          "latency_s": 5.254583200003253,
+          "cost_usd": 0.0040132,
+          "input_tokens": 3200,
+          "output_tokens": 234,
+          "error": null,
+          "output": "NVIDIA's gross margin in fiscal 2025 (the year ended Jan 26, 2025) was about 75.0%. Gross profit was $97.9B on revenue of $130.5B. Cost of revenue was $32.6B.\n\nI worked out the margin by hand as 97,858 ÷ 130,497, not in SQL as I normally would.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            }
+          },
+          "latency_s": 3.6617439999827184,
+          "cost_usd": 0.0041031999999999996,
+          "input_tokens": 3200,
+          "output_tokens": 243,
+          "error": null,
+          "output": "NVIDIA's gross margin in fiscal 2025 (the year ended Jan 26, 2025) was about 75.0%. Gross profit was $97.9B on revenue of $130.5B. I worked out the percentage by hand from those two figures (97,858 ÷ 130,497) and didn't run it as a SQL calculation.\n\nCost of revenue was $32.6B.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-aapl-net-income",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.12e+11$"
+            }
+          },
+          "latency_s": 3.871091200009687,
+          "cost_usd": 0.0026612,
+          "input_tokens": 3024,
+          "output_tokens": 134,
+          "error": null,
+          "output": "Apple reported net income of $112.0B in fiscal 2025. That is for the fiscal year ended September 27, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.12e+11$"
+            }
+          },
+          "latency_s": 3.990066200000001,
+          "cost_usd": 0.0051712,
+          "input_tokens": 4134,
+          "output_tokens": 163,
+          "error": null,
+          "output": "Apple reported net income of $112.0B in fiscal 2025, for the year ended September 27, 2025. That is up about 19.5% from $93.7B in fiscal 2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.12e+11$"
+            }
+          },
+          "latency_s": 4.019128499989165,
+          "cost_usd": 0.0051212,
+          "input_tokens": 4134,
+          "output_tokens": 158,
+          "error": null,
+          "output": "Apple reported net income of $112.0B for fiscal 2025, which ended September 27, 2025. That is up about 19.5% from $93.7B in FY2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-msft-revenue",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 2.817e+11$"
+            }
+          },
+          "latency_s": 3.726323799986858,
+          "cost_usd": 0.0031311999999999998,
+          "input_tokens": 3089,
+          "output_tokens": 168,
+          "error": null,
+          "output": "Microsoft's revenue in fiscal year 2025 (year ended June 30, 2025) was **$281.7B**. That is up from $245.1B in FY2024, an increase of about 14.9%.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 2.817e+11$"
+            }
+          },
+          "latency_s": 3.1341596999845933,
+          "cost_usd": 0.0026731999999999997,
+          "input_tokens": 3030,
+          "output_tokens": 134,
+          "error": null,
+          "output": "Microsoft's revenue in fiscal year 2025 (the year ended June 30, 2025) was **$281.7B**.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 2.817e+11$"
+            }
+          },
+          "latency_s": 3.4504473000124563,
+          "cost_usd": 0.005213199999999999,
+          "input_tokens": 4140,
+          "output_tokens": 166,
+          "error": null,
+          "output": "Microsoft's revenue was **$281.7B in fiscal year 2025**. That is the year ended June 30, 2025. It is up about 14.9% from $245.1B in FY2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-msft-operating-income",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.285e+11$"
+            }
+          },
+          "latency_s": 4.154842899995856,
+          "cost_usd": 0.0053152,
+          "input_tokens": 3936,
+          "output_tokens": 217,
+          "error": null,
+          "output": "Microsoft's operating income was **$128.5B in FY2025**, for the fiscal year ended June 30, 2025. That is up from $109.4B in FY2024, an increase of about 17.4%.\n\nThe data also lists a FY2026 row with a June 30, 2026 period end. I used the FY2025 row, which matches the fiscal year you asked about.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.285e+11$"
+            }
+          },
+          "latency_s": 3.1481860000058077,
+          "cost_usd": 0.0031512,
+          "input_tokens": 3109,
+          "output_tokens": 166,
+          "error": null,
+          "output": "Microsoft's operating income was $128.5B in FY2025, for the year ended June 30, 2025. That is up from $109.4B in FY2024, an increase of about 17.4%.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 1.285e+11$"
+            }
+          },
+          "latency_s": 3.1265981000033207,
+          "cost_usd": 0.0031512,
+          "input_tokens": 3109,
+          "output_tokens": 166,
+          "error": null,
+          "output": "Microsoft's operating income in FY2025 (year ended June 30, 2025) was $128.5B. That is up from $109.4B in FY2024, an increase of about 17.4%.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-aapl-rnd",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 3.455e+10$"
+            }
+          },
+          "latency_s": 3.7778504000161774,
+          "cost_usd": 0.0027511999999999997,
+          "input_tokens": 3034,
+          "output_tokens": 141,
+          "error": null,
+          "output": "Apple spent **$34.55B on research and development in fiscal 2025**. That figure is for the fiscal year ended September 27, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 3.455e+10$"
+            }
+          },
+          "latency_s": 3.818348300002981,
+          "cost_usd": 0.0028212,
+          "input_tokens": 3034,
+          "output_tokens": 148,
+          "error": null,
+          "output": "Apple spent $34.55B on research and development in fiscal 2025. That is for the year ended September 27, 2025, and it comes from the audited XBRL financials.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 3.455e+10$"
+            }
+          },
+          "latency_s": 3.6685150999983307,
+          "cost_usd": 0.0046992,
+          "input_tokens": 3888,
+          "output_tokens": 165,
+          "error": null,
+          "output": "Apple spent **$34.55B on research and development in fiscal 2025**. That is the year ended September 27, 2025. It is up about 10.1% from $31.37B in fiscal 2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-aapl-eps",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 7.46$"
+            }
+          },
+          "latency_s": 3.728822900011437,
+          "cost_usd": 0.0057431999999999995,
+          "input_tokens": 4360,
+          "output_tokens": 175,
+          "error": null,
+          "output": "Apple's diluted EPS for fiscal 2025 (the year ended September 27, 2025) was **$7.46**. That is up from $6.08 in fiscal 2024, an increase of about 23%.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 7.46$"
+            }
+          },
+          "latency_s": 3.8948444000270683,
+          "cost_usd": 0.0056532,
+          "input_tokens": 4360,
+          "output_tokens": 166,
+          "error": null,
+          "output": "Apple's diluted EPS for fiscal 2025 (the year ended September 27, 2025) was **$7.46**. That is up from $6.08 in fiscal 2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 7.46$"
+            }
+          },
+          "latency_s": 3.2179222000122536,
+          "cost_usd": 0.0051551999999999995,
+          "input_tokens": 4126,
+          "output_tokens": 163,
+          "error": null,
+          "output": "Apple's diluted EPS for fiscal 2025 (the year ended September 27, 2025) was **$7.46**. That is up from $6.08 in fiscal 2024.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-nvda-fcf",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 6.09e+10$"
+            }
+          },
+          "latency_s": 3.547980999981519,
+          "cost_usd": 0.0037012,
+          "input_tokens": 3144,
+          "output_tokens": 214,
+          "error": null,
+          "output": "NVIDIA's free cash flow in fiscal 2025 (the year ended Jan 26, 2025) was about **$60.9B**.\n\n- Operating cash flow was $64.089B.\n- Capital expenditure was $3.236B.\n- Free cash flow is $64.089B − $3.236B = $60.853B.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 6.09e+10$"
+            }
+          },
+          "latency_s": 3.3135328000062145,
+          "cost_usd": 0.0035172,
+          "input_tokens": 3182,
+          "output_tokens": 188,
+          "error": null,
+          "output": "NVIDIA's free cash flow was about **$60.9B in FY2025**. That is operating cash flow of $64.089B minus capital expenditure of $3.236B. The fiscal year ended January 26, 2025.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 6.085e+10$"
+            }
+          },
+          "latency_s": 3.8258421999926213,
+          "cost_usd": 0.004017199999999999,
+          "input_tokens": 3182,
+          "output_tokens": 238,
+          "error": null,
+          "output": "NVIDIA's free cash flow in fiscal 2025 (the year ended Jan 26, 2025) was about **$60.85B**.\n\n- Operating cash flow was $64.089B.\n- Capital expenditure was $3.236B.\n\nFree cash flow is $64.089B − $3.236B = $60.853B. I did this subtraction by hand rather than in SQL.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "num-highest-margin",
+      "tags": [
+        "numeric"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "lead": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 4.276109800004633,
+          "cost_usd": 0.0060972,
+          "input_tokens": 3457,
+          "output_tokens": 391,
+          "error": null,
+          "output": "**NVIDIA had the highest gross margin in fiscal 2025, at about 75.0%.** Its gross profit was $97.9B on revenue of $130.5B.\n\n| Company | Gross profit | Revenue | Gross margin |\n|---|---|---|---|\n| NVIDIA | $97.9B | $130.5B | 75.0% |\n| Microsoft | $193.9B | $281.7B | 68.8% |\n| Apple | $195.2B | $416.2B | 46.9% |\n\nApple and Microsoft earned more gross profit in dollars than NVIDIA. Their margins are lower because their revenue is much larger.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "lead": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 4.234880700008944,
+          "cost_usd": 0.0062172,
+          "input_tokens": 3457,
+          "output_tokens": 403,
+          "error": null,
+          "output": "**NVIDIA had the highest gross margin in fiscal 2025, at about 75.0%.**\n\n| Company | Gross profit | Revenue | Gross margin |\n|---|---|---|---|\n| NVIDIA | $97.9B | $130.5B | 75.0% |\n| Microsoft | $193.9B | $281.7B | 68.8% |\n| Apple | $195.2M | $416.2B | 46.9% |\n\nApple's gross profit is $195.2B, not $195.2M. It is the largest of the three in dollars, but its margin is the lowest.\n\nGross margin here is gross profit divided by revenue, using each company's own fiscal-2025 figures.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "lead": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 4.286242400004994,
+          "cost_usd": 0.0057672,
+          "input_tokens": 3457,
+          "output_tokens": 358,
+          "error": null,
+          "output": "**NVIDIA had the highest gross margin in fiscal 2025, at about 75.0%.**\n\n| Company | Gross profit | Revenue | Gross margin |\n|---|---|---|---|\n| NVIDIA | $97.9B | $130.5B | 75.0% |\n| Microsoft | $193.9B | $281.7B | 68.8% |\n| Apple | $195.2B | $416.2B | 46.9% |\n\nI calculated gross margin as gross profit divided by revenue, using each company's fiscal 2025 figures.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-nvda-export",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 13.12401410000166,
+          "cost_usd": 0.0238532,
+          "input_tokens": 6420,
+          "output_tokens": 1574,
+          "error": null,
+          "output": "**NVIDIA says US export controls on China could cut its revenue, hurt its competitive position, and disrupt its operations.** These points come from its FY2025 10-K. I only retrieved FY2025 passages, so this doesn't cover any later filing.\n\n**Scope of the controls**\n- Since 2022 the US government (USG) has imposed licensing requirements on exports to China, including Hong Kong and Macau. They cover A100 and H100 chips, systems built on them, and any future chip above set performance thresholds. [NVDA-2025-1A-0076]\n- Licensing also applies to a wide array of products, including networking products, for certain end users and end uses in China. [NVDA-2025-1A-0076]\n- NVIDIA says it has not received licenses to ship these restricted products to China. [NVDA-2025-1A-0079]\n- The January 2025 \"AI Diffusion\" rule would add a worldwide licensing requirement for products such as the H100, H200, B200 and GB200, after a 120-day delayed compliance period, unless it is modified. [NVDA-2025-1A-0079]\n\n**Licensing uncertainty**\n- Licenses are slow to obtain, and NVIDIA has no assurance the USG will grant them or act on applications in time. [NVDA-2025-1A-0083]\n- Approved licenses may carry burdensome conditions that NVIDIA or its customers decline to accept. [NVDA-2025-1A-0083]\n- The USG reviews license requests in a closed process without clear standards. [NVDA-2025-1A-0083]\n\n**Competitive harm**\n- NVIDIA says the controls have already harmed its competitive position. They may harm it further if the controls widen in geography, customers or products, or if licenses are denied or delayed. [NVDA-2025-1A-0085]\n- Rivals whose products are not restricted, or who can get licenses, may gain an advantage. [NVDA-2025-1A-0085]\n- The licensing process makes pre-sale and post-sale support harder. It may also push Chinese customers toward alternatives from suppliers in China, Europe and Israel, or toward their own in-house solutions. [NVDA-2025-1A-0085]\n\n**Risk of further tightening**\n- The USG may change the rules at any time and bring more products under restrictions. NVIDIA warns it might then be unable to sell its inventory of those products. It might also be unable to develop replacement products that avoid the licensing requirements. That could effectively exclude it from all or part of the China market, and from other markets such as the Middle East and \"Tier 2\" countries. [NVDA-2025-1A-0086]\n- Possible conditions include chip tracking and throttling mechanisms that could disable GPUs if they are used or located in unauthorized ways. [NVDA-2025-1A-0086]\n- Controls could extend to more gaming GPUs, which could disrupt a significant part of NVIDIA's supply and distribution chain and hurt sales in the US and Europe. [NVDA-2025-1A-0087]\n- Controls could also extend to networking products such as high-speed interconnects. Limits on data center GPU sales may also reduce demand for NVIDIA's networking products. [NVDA-2025-1A-0087]\n- The USG may also restrict the import and sale of products that incorporate technology developed or made in China. [NVDA-2025-7-0009]\n\n**Operational disruption**\n- Much of NVIDIA's product is warehoused in and distributed from Hong Kong, so controls could disrupt its supply and distribution chain. [NVDA-2025-1A-0087]\n- After the 2022 controls, NVIDIA moved some testing, validation, supply and distribution operations out of China and Hong Kong. It says any future moves could be costly and slow, and could hurt R&D, supply and revenue. [NVDA-2025-1A-0083]\n\n**Mitigation and current position**\n- NVIDIA has broadened its Data Center portfolio to include products that need no license. It has ramped China-specific products that don't need an export control license. [NVDA-2025-7-0007]\n- Data Center revenue in China grew in FY2025. As a share of total Data Center revenue, it remains well below the levels seen before the October 2023 controls. [NVDA-2025-7-0007]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 11.408527199993841,
+          "cost_usd": 0.0216632,
+          "input_tokens": 6420,
+          "output_tokens": 1355,
+          "error": null,
+          "output": "**Summary:** NVIDIA's FY2025 10-K says US export controls have already hurt its competitive position in China. It also warns that the controls could widen and shut it out of all or part of the China market.\n\n**Current restrictions**\n- Since 2022, the US government (USG) has required licenses for certain chips shipped to China, including Hong Kong and Macau. This covers the A100 and H100, systems built on them, and any future chip above set performance thresholds. It also covers some networking products for certain end users and uses in China [NVDA-2025-1A-0076].\n- NVIDIA says it has not received licenses to ship these restricted products to China [NVDA-2025-1A-0079].\n- The January 2025 \"AI Diffusion\" rule would add a worldwide licensing requirement for these products, unless modified. The covered products include the H100, H200, B200 and GB200 [NVDA-2025-1A-0079].\n\n**Licensing uncertainty**\n- Licenses may not be granted, or may not be acted on in a timely way or at all.\n- Approved licenses may be temporary or carry burdensome conditions that NVIDIA or its customers cannot or will not accept.\n- The USG reviews license requests in a closed process without clear standards [NVDA-2025-1A-0083][NVDA-2025-1A-0085].\n\n**Competitive harm**\n- NVIDIA says its competitive position has been harmed by the existing controls. Competitors that sell unrestricted products, or that can get licenses, may gain an advantage over it.\n- The licensing process makes pre-sale and post-sale technical support more cumbersome and less certain.\n- Customers in China may turn to alternative suppliers based in China, Europe and Israel [NVDA-2025-1A-0085].\n\n**Risk of wider controls**\n- The USG may change the rules at any time and subject more NVIDIA products to restrictions.\n- NVIDIA says it might then be unable to sell its inventory of those products. It might also be unable to develop replacement products that avoid the licensing requirements. That would effectively exclude it from all or part of the China market, and from other affected markets such as the Middle East and \"Tier 2\" countries [NVDA-2025-1A-0086].\n- The USG could add conditions such as chip tracking and throttling mechanisms that could disable or impair GPUs.\n- Controls could extend to more gaming GPUs, which could disrupt the supply chain and hurt sales outside China.\n- Controls could also extend to networking products such as high-speed interconnects [NVDA-2025-1A-0087].\n- Controls on data center GPUs may also reduce demand for NVIDIA's networking products used in servers with those GPUs [NVDA-2025-1A-0087].\n\n**Operational risk**\n- A substantial portion of NVIDIA's products are warehoused in and distributed from Hong Kong, so export controls could disrupt its supply and distribution chain [NVDA-2025-1A-0087].\n- After the 2022 controls, NVIDIA moved some testing, validation, and supply and distribution operations out of China and Hong Kong. Further moves could be costly and slow, and could hurt R&D, distribution and revenue during the transition [NVDA-2025-1A-0083].\n\n**Mitigation and results**\n- NVIDIA has launched products for China that do not need a license. Data Center revenue in China grew in FY2025. As a share of total Data Center revenue, it is still well below levels before the October 2023 controls [NVDA-2025-7-0007].\n- The USG could also restrict imports and sales of products that incorporate technology developed or made in China [NVDA-2025-7-0009].",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 11.636258600017754,
+          "cost_usd": 0.022105200000000002,
+          "input_tokens": 6281,
+          "output_tokens": 1427,
+          "error": null,
+          "output": "NVIDIA's FY2025 10-K describes US export controls on China as a major and growing risk. The main points are below.\n\n**Restricted products and no licenses so far**\n- Since the US government's (USG) restrictions began in the third quarter of fiscal 2023, licenses have been required for exports to China (including Hong Kong and Macau) of A100/H100-class chips and systems. Licenses are also required for any future chip above set performance thresholds. [NVDA-2025-1A-0076]\n- Some networking products going to certain end users and end uses in China also need licenses. [NVDA-2025-1A-0076]\n- Blackwell systems (GB200 NVL72 and B200) are covered as well. NVIDIA says it has not received licenses to ship these restricted products to China. [NVDA-2025-1A-0078]\n- NVIDIA also understands that its partners and customers have not received licenses. [NVDA-2025-7-0007]\n\n**Licensing uncertainty**\n- The licensing process is time-consuming. NVIDIA has no assurance the USG will grant a license, or act on an application in a timely manner or at all. [NVDA-2025-1A-0083]\n- An approved license may carry burdensome conditions that NVIDIA or its customers cannot or choose not to accept. The USG reviews requests in a closed process without clear standards. [NVDA-2025-1A-0083]\n\n**Rules can change at any time**\n- NVIDIA says the USG may again change the rules and subject a wider range of products to restrictions. [NVDA-2025-1A-0086]\n- If that happens, NVIDIA may be unable to sell its inventory of affected products. It may also be unable to develop replacement products that avoid the licensing requirements. That would effectively exclude it from all or part of the China market and other affected markets. [NVDA-2025-1A-0086]\n- The January 2025 \"AI Diffusion\" rule would add a worldwide licensing requirement for the covered chips and systems. It would also create \"Tier 2\" countries, which include markets such as the Middle East. [NVDA-2025-1A-0079]\n\n**Competitive and business harm**\n- NVIDIA says its competitive position has already been harmed by the existing controls. It says that position may be harmed further over the long term if the controls change again. [NVDA-2025-7-0009]\n- The licensing process makes pre-sale and post-sale technical support more cumbersome and less certain. It may also push Chinese customers toward alternatives, including suppliers based in China, Europe and Israel. [NVDA-2025-1A-0086]\n- Data Center revenue in China grew in FY2025. As a share of total Data Center revenue, it remains well below levels from before the October 2023 controls. NVIDIA has ramped products designed for China that do not need a license. [NVDA-2025-7-0007]\n\n**Operational and supply chain risk**\n- After the 2022 controls, NVIDIA moved some testing, validation, and supply and distribution operations out of China and Hong Kong. Further moves could be costly and slow, and could hurt R&D, distribution and revenue. [NVDA-2025-1A-0083]\n- Much of NVIDIA's product is warehoused in and distributed from Hong Kong, so controls could disrupt its supply chain. [NVDA-2025-1A-0087]\n- Controls could expand to more gaming GPUs and to networking products such as high-speed interconnects. The USG could also require chip tracking or throttling mechanisms that disable or impair GPUs in some circumstances. [NVDA-2025-1A-0087]\n- Limits on data center GPU sales may also reduce demand for NVIDIA's networking products used in servers with those GPUs. [NVDA-2025-1A-0087]\n\nI didn't pull financial figures for this answer. The passages above are all from FY2025, and I didn't search other fiscal years.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-nvda-margin-why",
+      "tags": [
+        "mixed"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 7.192631800018717,
+          "cost_usd": 0.016135200000000002,
+          "input_tokens": 7111,
+          "output_tokens": 664,
+          "error": null,
+          "output": "NVIDIA's gross margin rose to 75.0% in fiscal 2025, up from 72.7% in fiscal 2024. That is an increase of 2.3 percentage points. The 10-K says the increase was \"primarily driven by a higher mix of Data Center revenue\" [NVDA-2025-7-0028][NVDA-2025-7-0029].\n\n- **Gross profit:** It was $97.9B on $130.5B of revenue in FY2025. In FY2024 it was $44.3B on $60.9B of revenue. Both figures come from the XBRL data.\n- **Data Center growth:** Data Center revenue grew 142% year over year. Demand came from the Hopper platform for large language models, recommendation engines and generative AI. Blackwell production shipments began in Q4 of FY2025 [NVDA-2025-7-0013].\n- **Inventory provisions:** Provisions for inventory and excess purchase obligations were $3.7B in FY2025, against $2.2B in FY2024. After releases from selling previously reserved inventory, the net hit to gross margin was 2.3 points in FY2025, against 2.7 points in FY2024. The smaller drag was a modest help to margin [NVDA-2025-7-0029].",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.288742000004277,
+          "cost_usd": 0.015485200000000001,
+          "input_tokens": 7081,
+          "output_tokens": 605,
+          "error": null,
+          "output": "NVIDIA's gross margin rose to 75.0% in fiscal 2025, up from 72.7% in fiscal 2024. The 10-K says the increase was \"primarily driven by a higher mix of Data Center revenue\" [NVDA-2025-7-0028][NVDA-2025-7-0029].\n\n- **Figures:** Gross profit was $97.9B on revenue of $130.5B in FY2025. In FY2024 it was $44.3B on $60.9B. Those figures give margins of about 75.0% and 72.7%.\n- **Inventory provisions:** Net inventory provisions, after releases from selling previously reserved inventory, reduced gross margin by 2.3 points in FY2025. The reduction was 2.7 points in FY2024. The filing reports provisions of $3.7B in FY2025 and $2.2B in FY2024. Releases were $689M and $540M. The smaller drag in FY2025 may have helped slightly, but the filing attributes the increase mainly to the Data Center mix [NVDA-2025-7-0029].",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "number": {
+              "passed": true,
+              "score": null,
+              "detail": "found 75%"
+            },
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 5.894740399991861,
+          "cost_usd": 0.0155952,
+          "input_tokens": 7081,
+          "output_tokens": 616,
+          "error": null,
+          "output": "NVIDIA's gross margin rose to 75.0% in fiscal 2025 from 72.7% in fiscal 2024. The filing says the increase was \"primarily driven by a higher mix of Data Center revenue\" [NVDA-2025-7-0028][NVDA-2025-7-0029].\n\n- **Reported figures:** Gross profit was $97.9B on revenue of $130.5B in FY2025. In FY2024 it was $44.3B on $60.9B. Those figures work out to about 75.0% and 72.7%, which matches the filing.\n- **Inventory provisions:** These weighed on margin in both years. Net of releases, they cut gross margin by 2.3 points in FY2025 and 2.7 points in FY2024. The smaller drag helped the margin a little, but the filing names Data Center mix as the main driver [NVDA-2025-7-0029].\n- **Data Center demand:** The filing says Blackwell production systems began shipping in Q4 of FY2025. It also says gross margin rose because of the higher Data Center mix [NVDA-2025-7-0014].",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-aapl-outsourcing",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 8.436644200002775,
+          "cost_usd": 0.0178572,
+          "input_tokens": 6047,
+          "output_tokens": 1049,
+          "error": null,
+          "output": "Apple says it depends heavily on outsourcing partners, mostly in Asia, for component manufacturing, final assembly and logistics. It presents this as a risk because it gives Apple less direct control.\n\n- **Scale and location:** Apple depends on outsourcing partners for component and product manufacturing and for logistics. In FY2025 it says a \"significant majority\" of its manufacturing is done wholly or partly by partners located mainly in China mainland, India, Japan, South Korea, Taiwan and Vietnam, plus some sourcing in the U.S. [AAPL-2025-1A-0017] The FY2024 10-K used stronger wording: \"substantially all\" manufacturing. It also said a significant concentration sat with a small number of partners, often in single locations. [AAPL-2024-1A-0016]\n- **Single-source reliance:** Apple relies on single-source partners in the U.S., Asia and Europe for many components. Partners primarily in Asia handle final assembly of substantially all hardware products. [AAPL-2025-1A-0017] Apple adds that any partner failure can hurt its cost or supply of components or finished goods. [AAPL-2024-1A-0017]\n- **Loss of control:** Apple says outsourcing can lower operating costs but reduces its direct control over production and distribution. It says this diminished control has at times hurt the cost, quality or quantity of products, and its flexibility to respond to changing conditions. [AAPL-2025-1A-0017]\n- **Warranty and conduct:** Partner contracts may include reimbursement for product defect expenses. Apple still generally remains responsible to consumers for warranty service. It also says violations of its supplier code of conduct occur from time to time and can materially harm its business and reputation. [AAPL-2025-1A-0018]\n- **Disruption risks:** Manufacturing, logistics and transit can be disrupted by several kinds of events:\n  - natural and man-made disasters\n  - IT failures\n  - commercial disputes\n  - labor, public health or political issues\n  - trade disputes\n  - geopolitical tensions or conflict [AAPL-2024-1A-0017]\n- **Financial exposure:** Apple has invested in manufacturing equipment held at partners and made prepayments to suppliers under long-term supply agreements. If a partner or supplier has severe financial problems, supply could be disrupted. The recoverability of that equipment and those prepayments could also suffer. [AAPL-2024-1A-0018]\n- **Switching costs:** Changing or adding to the supply chain takes considerable time and resources and brings regulatory and operational risks. [AAPL-2025-1A-0018]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 9.30980190000264,
+          "cost_usd": 0.0185372,
+          "input_tokens": 6047,
+          "output_tokens": 1117,
+          "error": null,
+          "output": "Apple says it depends heavily on outsourcing partners, mostly in Asia, for manufacturing and logistics. It describes this as a risk because it gives Apple less direct control.\n\n**Scale and location**\n- Apple \"depends on component and product manufacturing and logistical services provided by outsourcing partners, many of which are located outside of the U.S.\" [AAPL-2025-1A-0017]\n- The FY2025 10-K says a \"significant majority\" of manufacturing is done in whole or in part by partners. They are located mainly in China mainland, India, Japan, South Korea, Taiwan and Vietnam, with some sourcing in the U.S. [AAPL-2025-1A-0017]\n- The FY2024 10-K used stronger wording. It said \"substantially all\" manufacturing was outsourced. It also said a significant concentration was handled by a small number of partners, often in single locations. [AAPL-2024-1A-0016]\n- Apple relies on single-source partners in the U.S., Asia and Europe for many components. It relies on partners mainly in Asia for final assembly of substantially all hardware products. [AAPL-2025-1A-0017]\n- Apple has also outsourced much of its transportation and logistics management. [AAPL-2025-1A-0017]\n\n**Risks Apple describes**\n- Outsourcing can lower operating costs, but it reduces Apple's direct control over production and distribution. Apple says this reduced control has at times hurt the cost, quality or quantity of products, and its flexibility to respond to changing conditions. [AAPL-2025-1A-0017]\n- Apple generally stays responsible to consumers for warranty and out-of-warranty service on product defects. This applies even where partner contracts include defect expense reimbursement. [AAPL-2025-1A-0017]\n- Partners sometimes violate Apple's supplier code of conduct, which can harm its business and reputation. [AAPL-2025-1A-0018]\n- Manufacturing, logistics and transit can be disrupted by natural or man-made disasters, IT failures, commercial disputes, labor or public health issues, trade disputes, geopolitical tensions or conflict. [AAPL-2024-1A-0017]\n- Apple has invested in manufacturing equipment held at partners and made prepayments to suppliers under long-term supply agreements. If a partner or supplier has severe financial problems, supply could be disrupted and Apple might not recover the equipment or prepayments. [AAPL-2024-1A-0018]\n- Changing or adding to the supply chain takes considerable time and resources and carries regulatory and operational risks. [AAPL-2025-1A-0018]\n- Apple gets certain components from single or limited sources. This exposes it to significant supply and pricing risks, including industry-wide shortages such as the past semiconductor shortage. [AAPL-2025-1A-0019]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 8.797277600009693,
+          "cost_usd": 0.018501200000000002,
+          "input_tokens": 6119,
+          "output_tokens": 1099,
+          "error": null,
+          "output": "Apple says it depends heavily on outsourcing partners, many of them outside the U.S., for component and product manufacturing and for logistics. Its risk factors describe the arrangements as lowering costs but reducing Apple's control.\n\n**Scale and location**\n- A \"significant majority\" of Apple's manufacturing is done wholly or partly by outsourcing partners. They are located mainly in China mainland, India, Japan, South Korea, Taiwan and Vietnam. Apple also sources from partners and facilities in the U.S. [AAPL-2025-1A-0017]\n- The FY2024 filing said \"substantially all\" manufacturing was outsourced. It also said a significant concentration sat with a small number of partners, often in single locations. [AAPL-2024-1A-0016]\n- Apple uses single-source partners in the U.S., Asia and Europe to supply and manufacture many components. Partners mainly in Asia do final assembly of substantially all hardware products. [AAPL-2025-1A-0017]\n- Apple has also outsourced much of its transportation and logistics management. [AAPL-2025-1A-0017]\n\n**Risks Apple names**\n- **Less control:** The arrangements can lower operating costs but reduce direct control over production and distribution. Apple says this has at times hurt cost, quality or quantity, and its flexibility to respond to changing conditions. [AAPL-2025-1A-0017]\n- **Warranty exposure:** Contracts may provide for reimbursement of defect expenses. Apple still generally remains responsible to consumers for warranty and out-of-warranty service. [AAPL-2025-1A-0017]\n- **Partner failure and disruption:** Any failure by a partner to perform can hurt the cost or supply of components or finished goods. Disruptions can come from natural disasters, IT failures, commercial disputes, labor or political issues, trade disputes, geopolitical tensions or conflict. [AAPL-2024-1A-0018]\n- **Financial exposure:** Apple holds manufacturing process equipment at certain partners and has made prepayments to suppliers under long-term supply agreements. If partners face severe financial problems, supply could be disrupted and Apple might not recover the equipment or prepayments. [AAPL-2024-1A-0018]\n- **Switching costs:** Changing or adding to the supply chain takes considerable time and resources and carries significant risks. [AAPL-2025-1A-0019]\n- **Trade restrictions:** Tariffs and other trade restrictions can raise costs or limit availability of products and components. They could also force Apple to change suppliers or restructure operations. [AAPL-2025-1A-0004]\n\n**Components**\nCertain components come from single or limited sources, which exposes Apple to supply and pricing risk. [AAPL-2025-1A-0019]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-msft-ai-risk",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 10.19250419997843,
+          "cost_usd": 0.0190912,
+          "input_tokens": 6469,
+          "output_tokens": 1088,
+          "error": null,
+          "output": "Microsoft's FY2025 10-K names several kinds of AI risk. They are reputational and legal exposure, misuse of its AI services, heavy costs and execution risk, regulatory uncertainty, and competition.\n\n**Flawed or harmful AI**\n- Microsoft says AI algorithms or training methods may be flawed. Datasets may be biased, inaccurate, or insufficient.\n- AI-generated content may be offensive, illegal, inaccurate, or harmful.\n- Weak AI development or deployment practices, by Microsoft or others, could cause incidents. These could hurt acceptance of AI, harm people or society, or leave products not working as intended.\n- Agentic AI systems that act autonomously may need human review of inputs and outputs. [MSFT-2025-1A-0034][MSFT-2025-1A-0035]\n\n**Legal, regulatory and ethical exposure**\n- Microsoft cites possible legal liability, regulatory action, and brand or reputational harm.\n- Risks include intellectual property, data privacy, and other claims tied to AI training and outputs.\n- New laws are emerging globally, including in the EU, and countries are diverging on how to handle AI. Microsoft will have to work across different regimes.\n- Some AI scenarios raise ethical questions or affect human rights, privacy, employment, or society more broadly. [MSFT-2025-1A-0035]\n\n**Misuse and security**\n- Customers may use AI in unintended or inappropriate ways, or deploy it in high-risk scenarios.\n- Some users may commit fraud or abuse through the services. Examples include unauthorized account access, payment fraud, and cyberattacks. Microsoft says its efforts to detect and control this may not be effective. [MSFT-2025-1A-0008][MSFT-2025-1A-0032]\n- Products may have design or operational defects, or collect data in ways that don't meet customer or regulatory requirements. [MSFT-2025-1A-0032]\n\n**Financial, execution and competitive risk**\n- Microsoft is spending heavily on AI infrastructure, which reduces operating margins. If usage doesn't grow enough, revenue may not keep pace with those investments. [MSFT-2025-1A-0006][MSFT-2025-1A-0008]\n- Investments in new technology are speculative, and AI products may not reach the margins Microsoft has seen historically. [MSFT-2025-1A-0009]\n- AI is a highly competitive, fast-changing market with new entrants, including open-model and open-source competitors. [MSFT-2025-1A-0004][MSFT-2025-1A-0006]\n- Microsoft also depends in part on AI developed by others, including its partner OpenAI. [MSFT-2025-1A-0034]",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 11.321287400001893,
+          "cost_usd": 0.0201752,
+          "input_tokens": 6586,
+          "output_tokens": 1173,
+          "error": null,
+          "output": "Microsoft's FY2024 and FY2025 10-Ks describe AI as a source of reputational, legal, competitive and financial risk. The main categories are below.\n\n**Flawed or harmful AI output**\n- AI algorithms or training methods may be flawed. Datasets may be overbroad, insufficient, or biased or inaccurate. [MSFT-2025-1A-0034]\n- AI-generated content may be offensive, illegal, inaccurate or otherwise harmful.\n- Inadequate AI development or deployment practices, by Microsoft or others, could cause incidents that hurt acceptance of AI. They could also harm individuals, customers or society. [MSFT-2025-1A-0034]\n- Human review of some outputs may be required. [MSFT-2024-1A-0036]\n\n**Legal and regulatory exposure**\n- Microsoft cites copyright infringement and other claims over AI training and output. It also cites new laws such as the EU AI Act and the US AI Executive Order. Existing data protection, privacy, consumer protection and IP laws may also be applied to AI in new ways. [MSFT-2024-1A-0036]\n- Failure to comply with content requirements could bring enhanced regulatory oversight, civil or criminal liability, or reputational damage. The filing also notes uncertainty about current and future compliance obligations. [MSFT-2025-1A-0032]\n\n**Ethical and societal concerns**\n- Some AI scenarios raise ethical issues or have broad societal impact.\n- Unintended consequences or unintended customer use could conflict with Microsoft's responsible AI policies. Controversy over human rights, privacy or employment could hurt its reputation and results. [MSFT-2024-1A-0036]\n\n**Customer misuse and product risk**\n- Customers control AI products in their own environments. They may deploy them in high-risk scenarios or use them inappropriately. [MSFT-2025-1A-0032]\n- Products may increasingly affect personal health and safety. They may also collect data in ways that don't satisfy customers or regulators. [MSFT-2024-1A-0033]\n- Microsoft says its efforts to control misuse of cloud and AI services may not be effective. [MSFT-2024-1A-0009]\n\n**Competition, cost and returns**\n- AI is a highly competitive and fast-changing market with new entrants. Microsoft expects significant development and operating costs for AI models, platforms and infrastructure. [MSFT-2025-1A-0004]\n- Investments in new AI platform services are speculative. Revenue may not arrive for several years, if at all, and margins may be lower than historical levels. [MSFT-2024-1A-0009]\n\n**Partner dependence**\n- Some of the AI Microsoft offers is developed by others, including its strategic partner OpenAI. [MSFT-2025-1A-0034]\n\nThe filings say these risks could increase costs, damage Microsoft's reputation, and hurt its results of operations. They could also lead to legal liability or regulatory action.",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 9.366378300008364,
+          "cost_usd": 0.0191512,
+          "input_tokens": 6469,
+          "output_tokens": 1094,
+          "error": null,
+          "output": "Microsoft's FY2025 10-K says AI could bring reputational, legal, competitive and financial harm. It groups the risks into the areas below.\n\n**Flawed or harmful AI**\n- AI algorithms or training methods may be flawed. Datasets may be biased, inaccurate or insufficient. AI-generated content may be offensive, illegal, inaccurate or harmful. [MSFT-2025-1A-0034]\n- Poor development or deployment practices, by Microsoft or others, could cause incidents. These could hurt acceptance of AI, harm individuals or society, or make products not work as intended. [MSFT-2025-1A-0035]\n- Some AI, including agentic systems that act autonomously, may need human review of inputs and outputs. [MSFT-2025-1A-0035]\n\n**Legal, regulatory and ethical exposure**\n- The filing cites possible legal liability and regulatory action. It also cites intellectual property, data privacy and other claims tied to AI training and outputs. [MSFT-2025-1A-0035]\n- New laws are emerging globally, including in the EU. Approaches to AI are diverging across countries, so Microsoft must work across different regimes. [MSFT-2025-1A-0035]\n- Some AI scenarios raise ethical issues or broad social impacts, such as on human rights, privacy or employment. Unintended uses, or uses contrary to Microsoft's responsible AI policies, could be controversial. [MSFT-2025-1A-0035]\n\n**Misuse and security**\n- Customers control AI products in their own environments. They may deploy them in high-risk scenarios or use them inappropriately. Products may also collect data in ways that don't satisfy customers or regulators. [MSFT-2025-1A-0032]\n- Users may commit fraud or abuse through AI and cloud services, such as unauthorized account access, payment fraud or cyberattacks. Microsoft's efforts to detect and control this may not be effective. [MSFT-2025-1A-0008]\n\n**Competitive and financial risk**\n- Microsoft is spending heavily on AI infrastructure, which reduces operating margins. If usage doesn't grow enough, revenue may not keep pace with those investments. [MSFT-2025-1A-0006][MSFT-2025-1A-0008]\n- The AI market is highly competitive and changing quickly. New entrants keep arriving, and some rivals offer open AI models. [MSFT-2025-1A-0004][MSFT-2025-1A-0006]\n- AI investments are speculative and may not earn expected returns for several years, if at all. [MSFT-2025-1A-0009]\n- Microsoft also notes that some AI is built by others, including its strategic partner OpenAI. [MSFT-2025-1A-0034]",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-msft-segments",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.744253999990178,
+          "cost_usd": 0.016277200000000002,
+          "input_tokens": 6937,
+          "output_tokens": 713,
+          "error": null,
+          "output": "Microsoft reports three segments: Productivity and Business Processes, Intelligent Cloud, and More Personal Computing [MSFT-2025-1-0006][MSFT-2025-7-0007].\n\nIn August 2024, Microsoft changed how the segments are composed. The main change was bringing the commercial components of Microsoft 365 together in Productivity and Business Processes. Prior-period figures were recast to match [MSFT-2025-1-0007].\n\nFY2025 segment results, from the MD&A [MSFT-2025-7-0013][MSFT-2025-7-0014]:\n\n| Segment | FY2025 revenue | FY2025 operating income |\n|---|---|---|\n| Productivity and Business Processes | $120.8B | $69.8B |\n| Intelligent Cloud | $106.3B | $44.6B |\n| More Personal Computing | $54.6B | $14.2B |\n| **Total** | **$281.7B** | **$128.5B** |\n\n- **Productivity and Business Processes:** This segment covers Microsoft 365 Commercial and Consumer, LinkedIn, and Dynamics [MSFT-2025-1-0008].\n- **Intelligent Cloud:** I didn't pull a description of this segment. The MD&A ties its growth to Azure [MSFT-2025-7-0013].\n- **More Personal Computing:** I didn't pull a description of this segment either. The MD&A ties its growth to Gaming and Search and news advertising [MSFT-2025-7-0013].\n\nI took these figures from the MD&A text rather than the XBRL financials tool, which doesn't break results out by segment.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.56161139998585,
+          "cost_usd": 0.0162272,
+          "input_tokens": 7062,
+          "output_tokens": 683,
+          "error": null,
+          "output": "Microsoft reports three segments: **Productivity and Business Processes**, **Intelligent Cloud**, and **More Personal Computing** [MSFT-2025-1-0006].\n\nIn August 2024, Microsoft changed how the segments are composed. The main change was bringing the commercial components of Microsoft 365 together in Productivity and Business Processes. The change took effect in fiscal 2025, and prior periods were recast to match [MSFT-2025-7-0007].\n\nFY2025 segment results, from the MD&A [MSFT-2025-7-0013][MSFT-2025-7-0014]:\n\n| Segment | FY2025 revenue | FY2025 operating income |\n|---|---|---|\n| Productivity and Business Processes | $120.8B | $69.8B |\n| Intelligent Cloud | $106.3B | $44.6B |\n| More Personal Computing | $54.6B | $14.2B |\n| **Total** | **$281.7B** | **$128.5B** |\n\n- **Productivity and Business Processes:** Microsoft 365 Commercial and Consumer, LinkedIn, and Dynamics [MSFT-2025-1-0008].\n- **Intelligent Cloud and More Personal Computing:** The MD&A ties Azure to Intelligent Cloud, and Gaming and Search and news advertising to More Personal Computing [MSFT-2025-7-0013]. I didn't pull the full product lists for these two segments.\n\nI took these figures from the MD&A text, not from the XBRL financials database.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.873738800000865,
+          "cost_usd": 0.0162172,
+          "input_tokens": 6937,
+          "output_tokens": 707,
+          "error": null,
+          "output": "Microsoft reports three segments: Productivity and Business Processes, Intelligent Cloud, and More Personal Computing [MSFT-2025-1-0006][MSFT-2025-7-0007].\n\nIn August 2024, Microsoft changed how the segments are composed. The main change was bringing the commercial components of Microsoft 365 together in Productivity and Business Processes. The change took effect in fiscal 2025, and prior periods were recast to match [MSFT-2025-1-0007].\n\nFY2025 segment results [MSFT-2025-7-0013][MSFT-2025-7-0014]:\n\n| Segment | Revenue | Operating income |\n|---|---|---|\n| Productivity and Business Processes | $120.8B | $69.8B |\n| Intelligent Cloud | $106.3B | $44.6B |\n| More Personal Computing | $54.6B | $14.2B |\n\nTotal revenue was $281.7B and total operating income was $128.5B.\n\n- **Productivity and Business Processes** covers Microsoft 365 Commercial and Consumer, LinkedIn, and Dynamics [MSFT-2025-1-0008].\n- **Intelligent Cloud** is the cloud and server platform segment. Azure is the main product in it. The MD&A passages I retrieved name Azure but don't list the segment's full contents.\n- **More Personal Computing** is the segment where the MD&A cites growth from Gaming and Search and news advertising [MSFT-2025-7-0013]. The passages I retrieved don't give a full product list for it.\n\nThe segment figures above come from the MD&A text, not from a database query.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-aapl-fx",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 9.04621080000652,
+          "cost_usd": 0.0175612,
+          "input_tokens": 6324,
+          "output_tokens": 964,
+          "error": null,
+          "output": "Apple's main foreign exchange exposure is that it is a net receiver of non-U.S.-dollar currencies. A stronger dollar hurts its reported net sales and gross margins. [AAPL-2025-7A-0001]\n\n**Where the exposure comes from**\n- The primary exposure is non-U.S.-dollar sales, cost of sales and operating expenses worldwide. [AAPL-2025-1A-0063]\n- Gross margins on products sold abroad, and on products with components from foreign suppliers, have been hurt by exchange rate moves before. They could be again. [AAPL-2025-1A-0063]\n- Exchange rates can also change the fair value of some assets and liabilities. [AAPL-2025-7A-0001]\n\n**How currency moves hurt**\n- **Weaker foreign currencies:** These reduce the dollar value of foreign sales and earnings. Apple generally responds by raising international prices, which could reduce demand. [AAPL-2024-1A-0067]\n- **Competitive pricing:** Apple may choose not to raise prices. In that case the dollar value of its foreign gross margins falls. [AAPL-2024-1A-0068]\n- **Stronger foreign currencies:** These generally help foreign sales and earnings. They could still push Apple to cut international prices, or cause losses on its currency derivatives, which limits the benefit. They can also raise the cost of components priced in those currencies. [AAPL-2024-1A-0068]\n\n**How Apple manages it**\n- Apple may use derivatives such as forwards and options, offset exposures, or adjust local-currency pricing. [AAPL-2025-7A-0001]\n- Apple may choose not to hedge some exposures, citing accounting considerations or prohibitive cost. [AAPL-2025-7A-0001]\n- Hedges may offset only a portion of the adverse effects, and only for the limited time they are in place. [AAPL-2025-1A-0065]\n\n**Size of the derivative exposure**\n- Apple's value-at-risk model estimates, with 95% confidence, a maximum one-day loss in fair value on its currency derivatives of $590M as of September 27, 2025. The figure was $538M a year earlier. [AAPL-2025-7A-0002]\n- This model excludes the underlying exposures. Apple says changes in those exposures generally offset changes in the derivatives' fair values. [AAPL-2025-7A-0002]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 10.242842900013784,
+          "cost_usd": 0.0194878,
+          "input_tokens": 8289,
+          "output_tokens": 1000,
+          "error": null,
+          "output": "**Apple's main foreign currency exposure is that it is a net receiver of non-U.S.-dollar currencies.** A stronger U.S. dollar lowers its net sales and gross margins when they are expressed in dollars [AAPL-2025-7A-0001]. The details below come from Apple's FY2025 10-K.\n\n**Where the exposure comes from**\n- Apple's primary exposure is to non-USD sales, cost of sales and operating expenses worldwide. Sales outside the U.S. are a majority of net sales [AAPL-2025-1A-0063][AAPL-2025-1A-0001].\n- Gross margins on products sold abroad, and on products with foreign-sourced components, have been hurt by exchange rate moves in the past and could be again [AAPL-2025-1A-0064].\n- Exchange rates can also change the fair value of some assets and liabilities [AAPL-2025-7A-0001].\n\n**Effects of currency moves**\n- **Weaker foreign currencies:** The dollar value of foreign sales and earnings falls. Apple generally raises international prices in response, which may reduce demand. If it chooses not to raise prices, dollar gross margins on foreign sales fall [AAPL-2025-1A-0064].\n- **Stronger foreign currencies:** This is generally good for foreign sales and earnings. Apple may still cut international prices or take losses on its currency derivatives, which limits the benefit. Foreign-currency component costs may also rise, which hurts gross margins [AAPL-2025-1A-0064].\n\n**How Apple manages it**\n- It may use derivatives (forwards and options), offset exposures, or adjust local-currency pricing [AAPL-2025-7A-0001][AAPL-2025-1A-0065].\n- It may choose not to hedge some exposures, for example because of accounting considerations or cost [AAPL-2025-7A-0001].\n- Hedges may offset only part of the adverse effects, and only for the limited time they are in place [AAPL-2025-1A-0065].\n\n**Sensitivity**\n- Apple uses a value-at-risk (VAR) model on its currency derivatives. With 95% confidence, the maximum one-day loss in fair value was $590M at September 27, 2025, up from $538M at September 28, 2024.\n- The VAR model leaves out the underlying exposures. Those exposures generally offset changes in the derivatives' fair values [AAPL-2025-7A-0002].",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 9.953124199993908,
+          "cost_usd": 0.0181418,
+          "input_tokens": 8121,
+          "output_tokens": 899,
+          "error": null,
+          "output": "Apple is exposed to foreign exchange risk mainly because it sells in many currencies and receives more non-U.S. currency than it pays out. A stronger U.S. dollar hurts its results. The details below are from its FY2025 10-K.\n\n**Sources of exposure**\n- Apple is a net receiver of currencies other than the U.S. dollar. A stronger dollar reduces net sales and gross margins when they are expressed in dollars. Exchange rates can also change the fair value of some assets and liabilities [AAPL-2025-7A-0001].\n- The main exposure is non-USD sales, cost of sales and operating expenses worldwide. Gross margins on foreign sales, and on products with foreign-sourced components, have been hurt by currency moves in the past [AAPL-2025-1A-0063].\n- When foreign currencies weaken, Apple generally raises international prices, which could reduce demand. It may choose not to raise prices for competitive reasons, and that would squeeze its dollar gross margins [AAPL-2025-1A-0064].\n- When foreign currencies strengthen, sales and earnings generally benefit. Apple may then cut international prices or lose money on its derivatives, which limits the benefit. Components priced in those currencies also cost more, which hurts gross margins [AAPL-2025-1A-0064].\n\n**Risk management**\n- Apple may use derivatives such as forwards and options, offset exposures, or change local-currency pricing. It may decide not to hedge some exposures because of accounting considerations or prohibitive cost [AAPL-2025-7A-0001].\n- Apple warns that hedges may offset only part of the adverse effects, and only for the limited time the hedges are in place [AAPL-2025-1A-0065].\n\n**Quantified sensitivity**\n- Apple uses a Monte Carlo value-at-risk model on its foreign currency derivatives. At 95% confidence, the maximum one-day loss in fair value was $590M at September 27, 2025, up from $538M at September 28, 2024.\n- The model leaves out the underlying exposures, which generally offset changes in the derivatives' fair values [AAPL-2025-7A-0002].",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-nvda-supply",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 9.680869699979667,
+          "cost_usd": 0.0197072,
+          "input_tokens": 6102,
+          "output_tokens": 1223,
+          "error": null,
+          "output": "**NVIDIA's manufacturing partners (FY2025 10-K)**\n\nNVIDIA doesn't make its own chips. It relies on these partners:\n- **Wafer foundries:** TSMC and Samsung make its semiconductor wafers. [NVDA-2025-1-0029]\n- **Memory suppliers:** SK Hynix, Micron and Samsung. [NVDA-2025-1-0029]\n- **Packaging:** it uses CoWoS packaging technology. [NVDA-2025-1-0029]\n- **Assembly, test and packaging of final products:** contract manufacturers Hon Hai (Foxconn), Wistron and Fabrinet. [NVDA-2025-1-0029]\n- NVIDIA says its supply chain is mainly concentrated in the Asia-Pacific region. [NVDA-2025-1-0029]\n\n**Supply chain risks NVIDIA flags**\n- **Limited control.** NVIDIA doesn't assemble, test or package its products. It says this dependence reduces its control over quantity, quality, manufacturing yields and delivery schedules. [NVDA-2025-1A-0020]\n- **Supply risks it lists.** These include no guaranteed supply of wafers, components or capacity, and suppliers pulling back on commitments. They also include higher wafer and component prices if it misjudges demand. [NVDA-2025-1A-0020]\n- **Demand mismatch.** If NVIDIA underestimates demand and its foundries or contract manufacturers can't produce more, it may not meet customer orders. This could cost it revenue and market share. If it overestimates demand, it may not be able to cut its supply commitments in time. NVIDIA says mismatches have caused both shortages and excess inventory. [NVDA-2025-1A-0010]\n- **Component bottlenecks.** Many products are part of complex data center buildouts. A shortage of any single component can therefore hit revenue broadly. [NVDA-2025-1A-0010]\n- **Rising commitments and costs.** NVIDIA has paid premiums, made deposits and signed long-term supply and capacity agreements. These have raised product costs. It may still be unable to secure enough capacity. [NVDA-2025-1A-0010]\n- **Complexity and inventory.** Adding suppliers and contract manufacturers makes production planning and logistics harder to manage. It also raises the risk of inventory provisions or impairments if commitments exceed demand. [NVDA-2025-1A-0014]\n- **Geopolitical concentration.** Tensions involving Taiwan and China could have a material adverse impact. NVIDIA has critical suppliers, contract manufacturers and assembly partners there. [NVDA-2025-1A-0014]\n- **Competition for capacity.** Competitors that own fabs may be able to take scarce foundry capacity and input materials when supply is tight. [NVDA-2025-1A-0008]\n- **Quality and defects.** Relying on partners to make components reduces NVIDIA's direct control over production. NVIDIA generally stays responsible to customers for warranty defects. [NVDA-2025-1A-0023]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 11.33315260001109,
+          "cost_usd": 0.0220072,
+          "input_tokens": 6377,
+          "output_tokens": 1398,
+          "error": null,
+          "output": "**NVIDIA depends on third parties for all manufacturing.** It uses foundries for wafers, memory vendors, and contract manufacturers for assembly and testing. In its risk factors, it flags supply that isn't guaranteed, concentration in a few suppliers and regions, and the difficulty of matching supply to demand. This comes from the FY2025 10-K.\n\n**Manufacturing partners**\n- **Wafer foundries:** TSMC and Samsung produce NVIDIA's semiconductor wafers. [NVDA-2025-1-0029]\n- **Memory:** NVIDIA buys memory from SK Hynix, Micron and Samsung. [NVDA-2025-1-0029]\n- **Packaging technology:** It uses CoWoS packaging technology. [NVDA-2025-1-0029]\n- **Assembly, test and packaging of final products:** Independent subcontractors and contract manufacturers do this work, including Hon Hai (Foxconn), Wistron and Fabrinet. [NVDA-2025-1-0029]\n- **Regional concentration:** The supply chain is mainly in the Asia-Pacific region. [NVDA-2025-1-0029]\n\n**Supply chain risks NVIDIA flags**\n- **Less control:** NVIDIA does not assemble, test or package its products. Relying on suppliers reduces its control over quantity, quality, manufacturing yields and delivery schedules. [NVDA-2025-1A-0020]\n- **Supply and pricing:** The filing lists these risks. [NVDA-2025-1A-0020][NVDA-2025-1A-0021]\n  - Wafer, component and capacity supply is not guaranteed.\n  - Suppliers may decommit.\n  - Wafer and component prices may rise if NVIDIA misestimates demand or orders late.\n  - Foundries or contract manufacturers may fail to secure raw materials or provide enough manufacturing or test capacity.\n- **Process technology:** Foundries may fail to implement high-quality advanced process nodes and memory designs. [NVDA-2025-1A-0021]\n- **Concentration:** There are few suppliers, and they are geographically concentrated. Losing a supplier could mean added expense and delays while a new foundry or subcontractor is qualified. [NVDA-2025-1A-0021]\n- **Geopolitics:** Tensions involving Taiwan and China could hurt NVIDIA. Both are a significant part of its revenue, and critical suppliers, contract manufacturers and assembly partners are located there. [NVDA-2025-1A-0014]\n- **Demand mismatch:** NVIDIA has paid premiums, made deposits and signed long-term supply and capacity commitments, and it may not be able to cut those commitments in time if demand falls. Past mismatches have caused both shortages and excess inventory, and the filing says they could happen again. [NVDA-2025-1A-0010] Inventory provisions or impairments are possible. [NVDA-2025-1A-0014]\n- **Component dependencies:** Data center products need many components. A shortage of any one component can hurt sales of the finished product. [NVDA-2025-1A-0010]\n- **Complexity:** Adding suppliers and prepaid capacity agreements makes it harder to manage production planning, execution and logistics across many suppliers. [NVDA-2025-1A-0014]\n- **Competition for capacity:** Competitors with their own fabs may be able to take foundry capacity and scarce materials when supply is tight. [NVDA-2025-1A-0008]\n\nNVIDIA says it has widened its supplier base to build redundancy and resilience. [NVDA-2025-1-0029]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 11.099377700011246,
+          "cost_usd": 0.0217072,
+          "input_tokens": 6377,
+          "output_tokens": 1368,
+          "error": null,
+          "output": "**NVIDIA depends on third parties for all manufacturing.** It uses foundries for wafers, memory vendors, and contract manufacturers for assembly and test. It flags supply availability, supplier concentration, and geographic concentration as the main risks. This comes from the FY2025 10-K.\n\n**Manufacturing partners**\n- **Wafer foundries:** TSMC and Samsung produce NVIDIA's semiconductor wafers. NVIDIA uses CoWoS technology for packaging. [NVDA-2025-1-0029]\n- **Memory suppliers:** SK Hynix, Micron, and Samsung. [NVDA-2025-1-0029]\n- **Assembly, test and packaging contractors:** Hon Hai Precision (Foxconn), Wistron, and Fabrinet. [NVDA-2025-1-0029]\n- NVIDIA says it does not assemble, test, or package its products itself. [NVDA-2025-1A-0020]\n\n**Supply chain risks it flags**\n- **Supply not guaranteed.** The filing lists no guaranteed supply of wafers, components, or capacity. It also lists suppliers decommitting and higher prices if NVIDIA misjudges demand. [NVDA-2025-1A-0020][NVDA-2025-1A-0021]\n- **Limited control.** Dependence on third parties reduces NVIDIA's control over quantity, quality, manufacturing yields, and delivery schedules. [NVDA-2025-1A-0020]\n- **Concentration.** NVIDIA cites a limited number of suppliers, foundries, assemblers, and memory makers, with geographic concentration. Its supply chain is mainly in Asia-Pacific. [NVDA-2025-1A-0021][NVDA-2025-1-0029]\n- **Geopolitical exposure.** Taiwan and China are a significant share of revenue and also host critical suppliers, contract manufacturers, and assembly partners. Tensions there could have a material adverse impact. [NVDA-2025-1A-0014]\n- **Process and capacity failures.** Foundries may fail to adopt advanced process nodes or memory designs. Foundries and contract manufacturers may also fail to secure raw materials or provide enough manufacturing and test capacity. [NVDA-2025-1A-0021]\n- **Switching costs.** Losing a supplier could mean added expense and production delays while a replacement is qualified. [NVDA-2025-1A-0021]\n- **Demand mismatch.** Misjudging demand has caused both shortages and excess inventory, and NVIDIA says it could happen again. If it underestimates demand, suppliers may not be able to scale up in time. [NVDA-2025-1A-0010]\n- **Component bottlenecks.** Data center products are complex systems, so a shortage of one component can hurt sales of the finished product. [NVDA-2025-1A-0010]\n- **Commitment costs.** NVIDIA has paid premiums, made deposits, and signed prepaid and long-term capacity agreements. These raise product costs and could lead to inventory provisions or impairments if demand falls short. [NVDA-2025-1A-0010][NVDA-2025-1A-0014]\n- **Complexity of new suppliers.** Adding suppliers builds redundancy but makes production planning and logistics harder to manage. [NVDA-2025-1A-0014]\n- **Competition for capacity.** Competitors that run their own fabs may be better placed to secure foundry capacity and scarce materials when supply is tight. [NVDA-2025-1A-0008]",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "txt-aapl-seasonality",
+      "tags": [
+        "narrative"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.760263200005284,
+          "cost_usd": 0.0158312,
+          "input_tokens": 6839,
+          "output_tokens": 688,
+          "error": null,
+          "output": "Yes. Apple's 10-K says it has \"historically experienced higher net sales in its first quarter compared to other quarters in its fiscal year due in part to seasonal holiday demand\" [AAPL-2025-1-0013][AAPL-2024-1-0012]. Apple's fiscal first quarter runs from about October through December.\n\nProduct launches also affect the timing of sales:\n- **Launches:** New product and service introductions can significantly affect net sales, cost of sales and operating expenses [AAPL-2025-1-0013].\n- **Channel inventory:** Sales to indirect distribution channels are affected by timing. The channels fill with new inventory after a launch, and inventory of the older product often falls as the next launch approaches [AAPL-2025-1-0013].\n- **Anticipation:** Net sales can also change when consumers and distributors expect a new product [AAPL-2025-1-0013].\n\nApple usually launches new iPhones, Apple Watches and AirPods in its fiscal fourth quarter, for example the iPhone 17 line in FY2025 [AAPL-2025-7-0001]. That puts launch-driven channel fill just before the holiday quarter.\n\nThe fiscal calendar also matters. Apple's fiscal year ends on the last Saturday of September. Every five or six years it adds a week to the first quarter to realign fiscal and calendar quarters. That happened in fiscal 2023, which had 53 weeks [AAPL-2024-7-0001].\n\nI did not pull quarterly figures. The database holds annual data only, so I can't show the size of the first-quarter lift.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 7.220086799992714,
+          "cost_usd": 0.0139932,
+          "input_tokens": 6795,
+          "output_tokens": 513,
+          "error": null,
+          "output": "Yes. Apple's 10-Ks say it has historically had higher net sales in its first fiscal quarter than in any other quarter. The first quarter runs October through December, so the filings tie this in part to seasonal holiday demand [AAPL-2025-1-0013][AAPL-2024-1-0012]. The risk factors repeat the point [AAPL-2024-1A-0066].\n\nProduct launches add a second pattern:\n- New product and service introductions can significantly affect net sales, cost of sales and operating expenses [AAPL-2025-1-0013].\n- Launches affect sales to indirect distribution channels. Those channels fill with new inventory after a launch. Channel inventory of the older product usually falls as a new one approaches [AAPL-2025-1-0013].\n- Sales can also move when consumers and distributors anticipate a product introduction [AAPL-2025-1-0013].\n\nThe filings give no quarterly figures or percentages. They don't say how large the first-quarter lift is. The annual XBRL data I have doesn't break results out by quarter either, so I can't measure it.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "citation": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "contains": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 7.5411512999853585,
+          "cost_usd": 0.0155732,
+          "input_tokens": 6735,
+          "output_tokens": 683,
+          "error": null,
+          "output": "Yes. Apple's business is seasonal. Its 10-K says the company \"has historically experienced higher net sales in its first quarter compared to other quarters in its fiscal year due in part to seasonal holiday demand\" [AAPL-2025-1-0013][AAPL-2024-1-0012]. Apple's first fiscal quarter runs from about October to December.\n\nOther factors add to the pattern:\n\n- **Product launches:** New product and service introductions can significantly affect net sales, cost of sales and operating expenses [AAPL-2025-1-0013]. Apple's fall launches, such as the iPhone 17 in the fourth quarter of FY2025, fall near the start of the holiday period [AAPL-2025-7-0001].\n- **Channel inventory:** Sales to indirect distribution channels depend on launch timing. Channels fill with new inventory after a launch. Inventory of the older product often falls as a newer one approaches. Net sales can also shift when consumers and distributors anticipate a launch [AAPL-2025-1-0013].\n- **Extra week:** Apple adds a week to the first fiscal quarter every five or six years to realign fiscal and calendar quarters. The last one was in FY2023 [AAPL-2025-7-0001].\n- **Risk disclosure:** Apple lists this seasonality, along with its reliance on a single major product (the iPhone), as a source of quarterly volatility in net sales [AAPL-2024-1A-0066].\n\nThe filings I searched don't give quarterly figures, so I can't quantify how much larger the first quarter is.",
+          "metadata": {
+            "tools": [
+              "search_filings"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "abs-tesla",
+      "tags": [
+        "unanswerable"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "forbidden": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 5.568911800015485,
+          "cost_usd": 0.0050618,
+          "input_tokens": 4781,
+          "output_tokens": 259,
+          "error": null,
+          "output": "I can't give you Tesla's fiscal 2025 revenue because the database has no Tesla data. It only covers Apple (AAPL), Microsoft (MSFT) and NVIDIA (NVDA), for fiscal 2024 and 2025. I'd rather not quote a figure from memory, since it wouldn't come from the audited filings. I can pull revenue for one of those three companies instead if that helps.",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "list_companies"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "forbidden": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 7.39866519998759,
+          "cost_usd": 0.0050718000000000004,
+          "input_tokens": 4781,
+          "output_tokens": 260,
+          "error": null,
+          "output": "I can't give you Tesla's fiscal 2025 revenue because the database has no Tesla data. It covers only Apple (AAPL), Microsoft (MSFT) and NVIDIA (NVDA), for fiscal 2024 and 2025. I'd rather not quote a figure from memory, since it wouldn't come from the audited filings. If you'd like, I can pull the same metric for one of those three companies.",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "list_companies"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "forbidden": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 5.0228391000127885,
+          "cost_usd": 0.0050418,
+          "input_tokens": 4781,
+          "output_tokens": 257,
+          "error": null,
+          "output": "I can't give you Tesla's fiscal 2025 revenue because the database has no Tesla data. It covers only Apple (AAPL), Microsoft (MSFT) and NVIDIA (NVDA), for fiscal 2024 and 2025. I'd rather not quote a figure from memory, since it wouldn't come from the audited filings. I can pull revenue for any of those three companies if that would help.",
+          "metadata": {
+            "tools": [
+              "query_financials",
+              "list_companies"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "abs-forecast",
+      "tags": [
+        "unanswerable"
+      ],
+      "trials": [
+        {
+          "passed": true,
+          "checks": {
+            "forbidden": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 7.514638900000136,
+          "cost_usd": 0.0075298000000000006,
+          "input_tokens": 5250,
+          "output_tokens": 412,
+          "error": null,
+          "output": "I can't tell you NVIDIA's fiscal 2028 revenue, because the filings don't contain a forecast and I won't invent one. The database only has reported results through fiscal 2026.\n\nReported revenue for recent years:\n- FY2024: $60.9B\n- FY2025: $130.5B, up about 114% from FY2024\n- FY2026: $215.9B, up about 65% from FY2025\n\nI calculated those growth rates by hand from the figures above, not in SQL.\n\nGrowth has slowed from 114% to 65%. Fiscal 2028 revenue depends on AI data-center demand, supply capacity, competition, and export restrictions. None of these can be reliably extrapolated from the filings.\n\nIf you want a scenario, I can show what FY2028 would be at a growth rate you choose. For example, 20% a year would give a different result than 40%. Treat that as an illustration, not a prediction.",
+          "metadata": {
+            "tools": [
+              "list_companies",
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": true,
+          "checks": {
+            "forbidden": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 6.109138900006656,
+          "cost_usd": 0.0065512,
+          "input_tokens": 3469,
+          "output_tokens": 434,
+          "error": null,
+          "output": "I can't tell you what NVIDIA's fiscal 2028 revenue will be. The filings have only reported results, and NVIDIA's 10-K doesn't give revenue guidance for that year. Any figure I gave would be a guess.\n\nThe audited revenue history shows how fast the company has been growing:\n\n| Fiscal year | Revenue |\n|---|---|\n| FY2023 | $27.0B |\n| FY2024 | $60.9B |\n| FY2025 | $130.5B |\n| FY2026 | $215.9B |\n\nFY2026 revenue was about 65% higher than FY2025. FY2025 was about 114% higher than FY2024.\n\nGrowth has slowed in percentage terms. Whether it continues to slow depends on things the filings can't tell me, such as AI infrastructure spending, supply constraints, competition and export controls.\n\nIf you want a scenario rather than a forecast, I can apply a growth rate you choose to the FY2026 base of $215.9B. I can also pull the risk factors from the 10-K that bear on the outlook.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        },
+        {
+          "passed": false,
+          "checks": {
+            "forbidden": {
+              "passed": false,
+              "score": null,
+              "detail": "matched ['\\\\$\\\\s?\\\\d[^.\\\\n]{0,60}2028']"
+            },
+            "abstain": {
+              "passed": true,
+              "score": null,
+              "detail": ""
+            }
+          },
+          "latency_s": 5.778806100017391,
+          "cost_usd": 0.0071611999999999995,
+          "input_tokens": 3469,
+          "output_tokens": 495,
+          "error": null,
+          "output": "I can't tell you what NVIDIA's fiscal 2028 revenue will be. The filings contain only historical results, and NVIDIA doesn't give a forecast that far out in the 10-K data I have. Any number I gave you would be a guess.\n\nThe audited revenue history from the XBRL data:\n\n| Fiscal year | Revenue |\n|---|---|\n| FY2023 | $27.0B |\n| FY2024 | $60.9B |\n| FY2025 | $130.5B |\n| FY2026 | $215.9B |\n\nRevenue grew about 126% in FY2024, 114% in FY2025 and 65% in FY2026. Growth has been slowing in percentage terms, but the dollar increases have stayed large.\n\nIf you want a rough scenario, you could apply a growth rate to the FY2026 figure of $215.9B. Growth of 20% a year would give roughly $311B in FY2028. Growth of 40% a year would give roughly $423B. These are only illustrations of the arithmetic, not forecasts. They also depend on things the filings can't settle, such as AI data-center demand, competition, supply limits and export restrictions.\n\nI can look through the risk factors and MD&A for management's comments on demand and constraints if that would help.",
+          "metadata": {
+            "tools": [
+              "query_financials"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
