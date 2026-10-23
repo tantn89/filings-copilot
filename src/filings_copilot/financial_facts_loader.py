@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
+from filings_copilot.fiscal_calendar import fiscal_year
+
 # metric name -> (unit, kind, candidate us-gaap concepts in priority order)
 # kind "flow" = measured over the fiscal year; "stock" = balance at fiscal year end.
 METRICS: dict[str, tuple[str, str, tuple[str, ...]]] = {
@@ -78,7 +80,7 @@ def annual_metrics(company_facts: dict[str, Any], ticker: str) -> list[MetricRow
                     cik=cik,
                     ticker=ticker,
                     metric=metric,
-                    fiscal_year=end.year,
+                    fiscal_year=fiscal_year(end),
                     period_start=start,
                     period_end=end,
                     value=float(fact["val"]),
