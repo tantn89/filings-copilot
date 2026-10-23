@@ -13,8 +13,8 @@ filing text with hybrid search, and answers with citations that link to the sour
 > **Live demo: [filings-copilot.vercel.app](https://filings-copilot.vercel.app)** ·
 > try [*"Why did NVIDIA's gross margin increase in FY2025?"*](https://filings-copilot.vercel.app/?q=Why%20did%20NVIDIA%27s%20gross%20margin%20increase%20in%20fiscal%202025%2C%20and%20to%20what%20level%3F)
 > · API [`/health`](https://filings-copilot-api-723085469023.us-central1.run.app/health) on Cloud Run.
-> The public demo runs Claude Sonnet 5.5 and is capped at 50 questions a day; if the cap
-> is reached, run it locally with your own key.
+> The public demo runs Claude Sonnet 5.5 and is rate-limited (5 questions per hour per
+> visitor, 50 per day); if a limit is reached, run it locally with your own key.
 
 ![Answer with cited 10-K passages and the evidence panel](docs/demo-answer-with-evidence.png)
 
@@ -125,20 +125,37 @@ What the runs show:
   filers; restatements repeat values in later filings. The loader picks concepts by
   priority, keeps true annual durations (350–380 days), and lets the latest filing win.
   The model sees `metric = 'revenue'`, not `RevenueFromContractWithCustomerExcludingAssessedTax`.
-- **SQL safety in two layers.** `sql_guard` parses the query with sqlglot and allows one
-  `SELECT` over three tables (CTEs, joins, window functions fine; file readers, `PRAGMA`,
-  `ATTACH`, `COPY`, qualified names rejected; row limit enforced). Underneath, the
-  serving connection is read-only with `enable_external_access = false` and locked config,
-  so even a guard bypass cannot write or read files. 18 attack cases are in the tests.
+- **Model-written SQL is bounded in what it can read and what it can cost.** `sql_guard`
+  parses the query with sqlglot and allows one `SELECT` over three tables, resolving table
+  names per scope so a CTE cannot alias a hidden table. It rejects writes, `PRAGMA`,
+  `ATTACH`, `COPY`, file readers, config/catalog functions, recursive CTEs and more than
+  four table references, and caps every result at 200 rows. Underneath, the serving
+  connection is read-only, has external access disabled, 256 MB of memory and one thread,
+  with its configuration locked; a watchdog interrupts any query after 5 s, and every tool
+  result is truncated to 20k characters before it reaches the model.
 - **Hand-rolled agent loop that yields events.** CLI, SSE API and the eval harness share
   one code path; every tool call is observable with its latency and token usage.
   Claude Opus 5.5 with adaptive thinking, prompt caching on the system prompt, and
   server-side refusal fallback.
 - **Messy-real-world handling found during development:** filers that repeat
   "PART I / Item 1A" as running page headers (Microsoft) broke naive section splitting;
-  NVIDIA reports capex as `PaymentsToAcquireProductiveAssets`; www.sec.gov over broken
-  IPv6 times out while data.sec.gov works (`FILINGS_SEC_FORCE_IPV4=true`). Each one has a
-  regression test.
+  hard-wrapped HTML lines starting with "Item 1A." looked like headings; adjacent table
+  cells merged into fake numbers; 52/53-week fiscal years ending in early January collided
+  with the next year; NVIDIA reports capex as `PaymentsToAcquireProductiveAssets`;
+  www.sec.gov over broken IPv6 times out while data.sec.gov works
+  (`FILINGS_SEC_FORCE_IPV4=true`). Each one has a regression test.
+
+## Security and robustness review
+
+Before calling the project done, the whole codebase went through a review aimed at the
+public endpoint: real attack queries against the SQL guard, cost-amplification paths, and
+malformed model output. It found, among others, that a CTE named after a hidden table
+(`WITH chunks AS (SELECT * FROM chunks)`) slipped past the allow-list, that a model-chosen
+`LIMIT 5000` produced a single 1.4M-character tool result (~340k tokens), that a recursive
+CTE could run unbounded on a container whose DuckDB believed it had 50 GiB of RAM, and that
+any SQL typo from the model aborted the whole answer. All were fixed with regression tests;
+the reproductions are in `tests/test_sql_guard.py`, `tests/test_retrieval_and_tools.py`
+and `tests/test_serving_store_lockdown.py`.
 
 ## Quickstart
 
@@ -161,7 +178,7 @@ The UI reads the API from `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8000`
 Tests run fully offline (fake Claude client, hashing embedder, mocked EDGAR, in-memory DuckDB):
 
 ```bash
-pytest --cov=filings_copilot    # 57 tests, 86% coverage
+pytest --cov=filings_copilot    # 118 tests, 89% coverage
 ruff check src tests && mypy    # strict typing
 ```
 
@@ -187,7 +204,10 @@ cost per call, which the eval report uses for cost per question.
   builds the Dockerfile with Cloud Build (the pre-built DuckDB file ships in the image),
   stores LLM keys in Secret Manager, and deploys with scale-to-zero and one max instance.
   It refuses to deploy without a daily question cap: every public question costs credits.
-  `/health` publishes the active model and limits so the protection is checkable.
+  `/health` publishes the active model and limits so the protection is checkable. The caps
+  live in process memory and reset when the instance restarts, so the hard bound on spend
+  is the LLM provider's own limit (an Anthropic workspace spend limit or an OpenRouter key
+  limit), which should always be set for a public demo.
   Running cost sits inside the Cloud Run free tier; a billing budget alert covers surprises.
 - **UI → Vercel.** Root directory `web/`, env `NEXT_PUBLIC_API_URL=<Cloud Run URL>`; then set
   `FILINGS_CORS_ORIGINS` to the Vercel URL and redeploy the API.
