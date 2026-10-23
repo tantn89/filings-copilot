@@ -180,7 +180,7 @@ The UI reads the API from `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8000`
 Tests run fully offline (fake Claude client, hashing embedder, mocked EDGAR, in-memory DuckDB):
 
 ```bash
-pytest --cov=filings_copilot    # 118 tests, 89% coverage
+pytest --cov=filings_copilot    # 119 tests, 89% coverage
 ruff check src tests && mypy    # strict typing
 ```
 
@@ -240,6 +240,8 @@ src/filings_copilot/
   http_api.py / cli.py       FastAPI + Typer entry points
 evals/golden_questions.jsonl  20 graded questions with XBRL ground truth
 ```
+
+Product rules, architecture decisions, standards and the deploy runbook are in [`docs/`](docs/README.md).
 
 ## Roadmap
 
