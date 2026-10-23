@@ -5,8 +5,9 @@
 What it does, idempotently:
 1. Enables the Run, Cloud Build, Artifact Registry and Secret Manager APIs.
 2. Stores LLM keys from .env in Secret Manager (values are piped, never printed).
-3. Deploys with scale-to-zero, one instance at most and the demo question caps, so the
-   worst-case LLM spend is bounded by FILINGS_DEMO_DAILY_QUESTION_CAP.
+3. Deploys with scale-to-zero, one instance at most and the demo question caps. The
+   caps live in process memory and reset when the instance restarts, so the hard bound
+   on LLM spend is the provider-side limit (Anthropic workspace / OpenRouter key).
 
 Requires `gcloud auth login` and a project with billing enabled.
 """
@@ -74,23 +75,26 @@ def main() -> None:
 
     secrets = {"ANTHROPIC_API_KEY": settings.anthropic_api_key,
                "OPENROUTER_API_KEY": settings.openrouter_api_key}
+    # In new projects the default compute service account both builds the image (Cloud
+    # Build) and runs the service: it gets the builder role on the project, and read
+    # access only to the secrets this service uses.
+    number = gcloud("projects", "describe", args.project, "--format=value(projectNumber)",
+                    stdin="").stdout.strip()
+    service_account = f"serviceAccount:{number}-compute@developer.gserviceaccount.com"
+    gcloud("projects", "add-iam-policy-binding", args.project, f"--member={service_account}",
+           "--role=roles/run.builder", "--condition=None", "--quiet", stdin="")
+
     bindings = []
     for env_name, value in secrets.items():
         if value:
             secret_name = f"filings-copilot-{env_name.lower().replace('_', '-')}"
             put_secret(args.project, secret_name, value)
+            gcloud("secrets", "add-iam-policy-binding", secret_name, f"--project={args.project}",
+                   f"--member={service_account}", "--role=roles/secretmanager.secretAccessor",
+                   "--quiet", stdin="")
             bindings.append(f"{env_name}={secret_name}:latest")
     if not bindings:
         raise SystemExit("No LLM key found in .env (ANTHROPIC_API_KEY or OPENROUTER_API_KEY).")
-
-    # In new projects the default compute service account both builds the image (Cloud
-    # Build) and runs the service, so it needs the builder role and secret read access.
-    number = gcloud("projects", "describe", args.project, "--format=value(projectNumber)",
-                    stdin="").stdout.strip()
-    for role in ("roles/run.builder", "roles/secretmanager.secretAccessor"):
-        gcloud("projects", "add-iam-policy-binding", args.project,
-               f"--member=serviceAccount:{number}-compute@developer.gserviceaccount.com",
-               f"--role={role}", "--condition=None", "--quiet", stdin="")
 
     env_vars = {
         "FILINGS_LLM_PROVIDER": settings.llm_provider,
@@ -99,26 +103,29 @@ def main() -> None:
         "FILINGS_CORS_ORIGINS": settings.cors_origins,
         "FILINGS_DEMO_QUESTIONS_PER_HOUR": str(settings.demo_questions_per_hour),
         "FILINGS_DEMO_DAILY_QUESTION_CAP": str(settings.demo_daily_question_cap),
+        "FILINGS_TRUSTED_PROXY_HOPS": str(settings.trusted_proxy_hops),
     }
     # An env-vars file, not --set-env-vars: on Windows gcloud.cmd runs through cmd.exe,
     # which eats the "^@^" custom-delimiter syntax and merges every variable into one.
     with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False, encoding="utf-8") as f:
         json.dump(env_vars, f)  # a JSON object is valid YAML
         env_file = f.name
-    gcloud(
-        "run", "deploy", SERVICE, "--source", str(ROOT),
-        f"--project={args.project}", f"--region={args.region}",
-        "--allow-unauthenticated",
-        "--memory=1Gi", "--cpu=1",
-        # One instance keeps the in-memory question caps exact and bounds spend;
-        # zero minimum instances means no cost while idle.
-        "--min-instances=0", "--max-instances=1", "--concurrency=20",
-        "--timeout=300",
-        f"--env-vars-file={env_file}",
-        "--set-secrets=" + ",".join(bindings),
-        "--quiet",
-    )
-    Path(env_file).unlink()
+    try:
+        gcloud(
+            "run", "deploy", SERVICE, "--source", str(ROOT),
+            f"--project={args.project}", f"--region={args.region}",
+            "--allow-unauthenticated",
+            "--memory=1Gi", "--cpu=1",
+            # One instance keeps the in-memory question caps consistent; zero minimum
+            # instances means no cost while idle (and a cap reset after each restart).
+            "--min-instances=0", "--max-instances=1", "--concurrency=20",
+            "--timeout=300",
+            f"--env-vars-file={env_file}",
+            "--set-secrets=" + ",".join(bindings),
+            "--quiet",
+        )
+    finally:
+        Path(env_file).unlink()
     url = gcloud("run", "services", "describe", SERVICE, f"--project={args.project}",
                  f"--region={args.region}", "--format=value(status.url)", stdin="").stdout.strip()
     print(f"Deployed: {url}  (try {url}/health)")
