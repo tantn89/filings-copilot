@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import json
+import threading
 from dataclasses import dataclass, field
 from typing import Any
 
+import duckdb
+
 from filings_copilot.filings_store import FilingsStore
 from filings_copilot.hybrid_retriever import HybridRetriever, RetrievedChunk, SearchFilters
-from filings_copilot.sql_guard import UnsafeSQLError, validate_select
+from filings_copilot.sql_guard import MAX_ROWS, UnsafeSQLError, validate_select
 from filings_copilot.tenk_section_parser import SECTION_TITLES
 
 FINANCIALS_SCHEMA = """\
@@ -67,6 +70,26 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
 ]
 
 
+# Every tool result is resent to the model on each later turn, so it is size-bounded.
+MAX_TOOL_OUTPUT_CHARS = 20_000
+QUERY_TIMEOUT_S = 5.0
+
+
+def _as_list(value: Any) -> list[Any]:
+    """Models without schema enforcement may send a scalar where a list is expected."""
+    if value is None or value == "":
+        return []
+    return list(value) if isinstance(value, list | tuple) else [value]
+
+
+def _truncate(text: str) -> str:
+    if len(text) <= MAX_TOOL_OUTPUT_CHARS:
+        return text
+    omitted = len(text) - MAX_TOOL_OUTPUT_CHARS
+    note = f"[truncated: {omitted} more characters; narrow the query]"
+    return f"{text[:MAX_TOOL_OUTPUT_CHARS]}\n{note}"
+
+
 @dataclass
 class ToolOutcome:
     content: str
@@ -88,9 +111,13 @@ class ToolExecutor:
         if handler is None:
             return ToolOutcome(f"Unknown tool: {name}", is_error=True)
         try:
-            return handler(tool_input)
-        except (UnsafeSQLError, ValueError, KeyError, TypeError) as e:
-            return ToolOutcome(f"Error: {e}", is_error=True)
+            outcome = handler(tool_input)
+        # duckdb.Error covers binder/catalog errors from model-written SQL (e.g. a wrong
+        # column name) and interrupted queries; the model gets the message and can retry.
+        except (UnsafeSQLError, duckdb.Error, ValueError, KeyError, TypeError) as e:
+            outcome = ToolOutcome(f"Error: {e}", is_error=True)
+        outcome.content = _truncate(outcome.content)
+        return outcome
 
     def _list_companies(self, _: dict[str, Any]) -> ToolOutcome:
         rows = self.store.cursor().execute(
@@ -106,9 +133,9 @@ class ToolExecutor:
 
     def _search_filings(self, tool_input: dict[str, Any]) -> ToolOutcome:
         filters = SearchFilters(
-            tickers=tool_input.get("tickers") or (),
-            fiscal_years=tool_input.get("fiscal_years") or (),
-            section_items=tool_input.get("section_items") or (),
+            tickers=[str(t) for t in _as_list(tool_input.get("tickers"))],
+            fiscal_years=[int(y) for y in _as_list(tool_input.get("fiscal_years"))],
+            section_items=[str(s) for s in _as_list(tool_input.get("section_items"))],
         )
         hits = self.retriever.search(str(tool_input["query"]), filters)
         if not hits:
@@ -122,9 +149,18 @@ class ToolExecutor:
 
     def _query_financials(self, tool_input: dict[str, Any]) -> ToolOutcome:
         safe_sql = validate_select(str(tool_input["sql"]))
-        cursor = self.store.cursor().execute(safe_sql)
-        columns = [d[0] for d in cursor.description]
-        rows = [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
+        cursor = self.store.cursor()
+        # A runaway query (huge join, heavy expression) is interrupted instead of holding
+        # the single serving CPU; DuckDB raises InterruptException, reported to the model.
+        watchdog = threading.Timer(QUERY_TIMEOUT_S, cursor.interrupt)
+        watchdog.start()
+        try:
+            cursor.execute(safe_sql)
+            columns = [d[0] for d in cursor.description]
+            fetched = cursor.fetchmany(MAX_ROWS)
+        finally:
+            watchdog.cancel()
+        rows = [dict(zip(columns, row, strict=True)) for row in fetched]
         if not rows:
             return ToolOutcome(f"Query returned no rows.\nSQL: {safe_sql}")
         return ToolOutcome(json.dumps({"sql": safe_sql, "rows": rows}, default=str))

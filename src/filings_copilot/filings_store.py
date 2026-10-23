@@ -16,6 +16,8 @@ import duckdb
 from filings_copilot.edgar_client import Company, FilingRef
 from filings_copilot.financial_facts_loader import MetricRow
 
+SERVING_MEMORY_LIMIT = "256MB"
+
 
 @dataclass(frozen=True)
 class ChunkRecord:
@@ -38,11 +40,29 @@ class FilingsStore:
         self.conn = duckdb.connect(str(path), read_only=read_only)
         self.conn.execute("INSTALL fts; LOAD fts;")
         if read_only:
-            # Defense in depth behind sql_guard: the serving connection cannot write, and
-            # cannot read local files or URLs even if a query slipped past validation.
-            self.conn.execute("SET enable_external_access = false; SET lock_configuration = true;")
+            self._check_embedding_dimension()
+            # Defense in depth behind sql_guard: the serving connection cannot write, cannot
+            # read local files or URLs, and cannot use more than a slice of the container's
+            # memory or CPU, even if a query slipped past validation. DuckDB defaults to 80%
+            # of *host* RAM and all host cores, far beyond a 1 GiB / 1 vCPU container.
+            self.conn.execute(
+                f"SET memory_limit = '{SERVING_MEMORY_LIMIT}'; SET threads = 1;"
+                " SET max_temp_directory_size = '0B';"
+                " SET enable_external_access = false; SET lock_configuration = true;"
+            )
         else:
             self._create_schema()
+
+    def _check_embedding_dimension(self) -> None:
+        row = self.conn.execute(
+            "SELECT data_type FROM information_schema.columns "
+            "WHERE table_name = 'chunks' AND column_name = 'embedding'"
+        ).fetchone()
+        if row and row[0] != f"FLOAT[{self.dimension}]":
+            raise ValueError(
+                f"Stored embeddings are {row[0]} but the embedding model produces "
+                f"FLOAT[{self.dimension}]. Re-run `filings-copilot ingest --force`."
+            )
 
     def close(self) -> None:
         self.conn.close()
