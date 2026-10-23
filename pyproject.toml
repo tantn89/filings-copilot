@@ -27,17 +27,14 @@ dependencies = [
 
 [project.optional-dependencies]
 # Agent evals and the CI eval gate run on regressgate; the serving image does not need it.
-eval = ["regressgate @ git+https://github.com/tantn89/regressgate@4cd1091e6d82c10d56c3c275c7d9b49f2c35acaa"]
+eval = ["regressgate>=0.1,<0.2"]
 dev = [
   "mypy>=1.11", "pytest>=8.3", "pytest-cov>=5.0", "respx>=0.21", "ruff>=0.6",
-  "regressgate @ git+https://github.com/tantn89/regressgate@4cd1091e6d82c10d56c3c275c7d9b49f2c35acaa",
+  "regressgate>=0.1,<0.2",
 ]
 
 [project.scripts]
 filings-copilot = "filings_copilot.cli:app"
-
-[tool.hatch.metadata]
-allow-direct-references = true  # regressgate is pinned to a commit until its PyPI release
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/filings_copilot"]
