@@ -1,18 +1,30 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import type { Citation, Run, TraceStep } from "@/lib/agent-types";
-import { TOOL_LABELS, formatSeconds, formatSql, linkCitations, sourceLabel } from "@/lib/format";
+import { TOOL_LABELS, formatSeconds, formatSql, linkAnswer, sourceLabel } from "@/lib/format";
 import styles from "./copilot.module.css";
 
 export type EvidenceTab = "trace" | "sources";
+
+/** The source to scroll to; `seq` changes on every chip click so a repeat click re-scrolls. */
+export type SourceFocus = { id: string; seq: number };
+
+const TABS: readonly EvidenceTab[] = ["trace", "sources"];
+const PANEL_ID = "evidence-tabpanel";
 
 type Props = {
   run: Run | null;
   tab: EvidenceTab;
   onTab: (tab: EvidenceTab) => void;
-  activeSource: string | null;
+  activeSource: SourceFocus | null;
 };
+
+/** Tool input comes straight from the model, unvalidated: coerce any value to a list of strings. */
+function toList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String);
+  return value == null ? [] : [String(value)];
+}
 
 function StepDetail({ step }: { step: TraceStep }) {
   const input = step.input;
@@ -21,16 +33,16 @@ function StepDetail({ step }: { step: TraceStep }) {
   }
   if (step.name === "search_filings") {
     const filters = [
-      ...((input.tickers as string[]) ?? []),
-      ...((input.fiscal_years as number[]) ?? []).map((y) => `FY${y}`),
-      ...((input.section_items as string[]) ?? []).map((s) => `Item ${s}`),
+      ...toList(input.tickers),
+      ...toList(input.fiscal_years).map((y) => `FY${y}`),
+      ...toList(input.section_items).map((s) => `Item ${s}`),
     ];
     return (
       <>
         <pre className={styles.code}>{String(input.query ?? "")}</pre>
         {filters.length > 0 && (
           <div className={styles.filters}>
-            {filters.map((f) => <span key={f} className={styles.filterChip}>{f}</span>)}
+            {filters.map((f, i) => <span key={`${i}-${f}`} className={styles.filterChip}>{f}</span>)}
           </div>
         )}
       </>
@@ -62,11 +74,14 @@ function Trace({ steps }: { steps: TraceStep[] }) {
   );
 }
 
-function Sources({ cited, activeSource }: { cited: Citation[]; activeSource: string | null }) {
+function Sources({ cited, activeSource }: { cited: Citation[]; activeSource: SourceFocus | null }) {
   const refs = useRef<Record<string, HTMLLIElement | null>>({});
+  const activeId = activeSource?.id ?? null;
 
   useEffect(() => {
-    if (activeSource) refs.current[activeSource]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    if (!activeSource) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    refs.current[activeSource.id]?.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
   }, [activeSource]);
 
   if (cited.length === 0) {
@@ -79,7 +94,7 @@ function Sources({ cited, activeSource }: { cited: Citation[]; activeSource: str
           key={c.chunk_id}
           id={`src-${c.chunk_id}`}
           ref={(el) => { refs.current[c.chunk_id] = el; }}
-          className={`${styles.source} ${activeSource === c.chunk_id ? styles.sourceActive : ""}`}
+          className={`${styles.source} ${activeId === c.chunk_id ? styles.sourceActive : ""}`}
         >
           <div className={styles.sourceHead}>
             <span className={styles.sourceIndex}>{i + 1}</span>
@@ -126,20 +141,33 @@ function HowItWorks() {
 }
 
 export function EvidencePanel({ run, tab, onTab, activeSource }: Props) {
-  const cited = run?.answer ? linkCitations(run.answer.answer, run.answer.citations).ordered : [];
+  const cited = run?.answer ? linkAnswer(run.answer).ordered : [];
+
+  // Roving tabindex: only the selected tab is in the Tab order; arrow keys move between tabs.
+  function onTabKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const step = event.key === "ArrowRight" ? 1 : -1;
+    const next = TABS[(TABS.indexOf(tab) + step + TABS.length) % TABS.length];
+    onTab(next);
+    document.getElementById(`tab-${next}`)?.focus();
+  }
 
   return (
     <section className={styles.panel} aria-labelledby="evidence-title">
       <header className={styles.panelHeader}>
         <h2 id="evidence-title" className={styles.panelTitle}>Evidence</h2>
         {run && (
-          <div className={styles.tabs} role="tablist" aria-label="Evidence view">
-            {(["trace", "sources"] as const).map((t) => (
+          <div className={styles.tabs} role="tablist" aria-label="Evidence view" onKeyDown={onTabKeyDown}>
+            {TABS.map((t) => (
               <button
                 key={t}
+                id={`tab-${t}`}
                 type="button"
                 role="tab"
                 aria-selected={tab === t}
+                aria-controls={PANEL_ID}
+                tabIndex={tab === t ? 0 : -1}
                 className={`${styles.tab} ${tab === t ? styles.tabActive : ""}`}
                 onClick={() => onTab(t)}
               >
@@ -149,7 +177,13 @@ export function EvidencePanel({ run, tab, onTab, activeSource }: Props) {
           </div>
         )}
       </header>
-      <div className={styles.panelBody} role={run ? "tabpanel" : undefined}>
+      <div
+        className={styles.panelBody}
+        id={run ? PANEL_ID : undefined}
+        role={run ? "tabpanel" : undefined}
+        aria-labelledby={run ? `tab-${tab}` : undefined}
+        tabIndex={run ? 0 : undefined}
+      >
         {!run && <HowItWorks />}
         {run && tab === "trace" && (
           run.steps.length ? <Trace steps={run.steps} />

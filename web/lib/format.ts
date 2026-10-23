@@ -1,4 +1,4 @@
-import type { Citation, Company } from "./agent-types";
+import type { AnswerEvent, Citation, Company } from "./agent-types";
 
 export const TOOL_LABELS: Record<string, string> = {
   query_financials: "SQL over XBRL financials",
@@ -41,18 +41,46 @@ export function coverageSummary(companies: Company[]): string {
   return `${companies.map((c) => c.ticker).join(", ")} · 10-K text ${span}`;
 }
 
+// Same id format and grouping rules as the backend's citation parser (research_agent.py).
+const CHUNK_ID = /^[A-Z.\-]+-\d{4}-\d{1,2}[A-C]?-\d{4}$/;
+
+export const UNVERIFIED_HREF_PREFIX = "#unverified-";
+
+export type LinkedAnswer = { text: string; ordered: Citation[] };
+
 /**
- * Number citations in order of first appearance and rewrite "[NVDA-2025-7-0012]" into
- * markdown links "[1](#src-NVDA-2025-7-0012)" that the answer renderer turns into chips.
+ * Number citations in order of first appearance and rewrite "[NVDA-2025-7-0012]" (or a
+ * group such as "[NVDA-2025-7-0012, NVDA-2025-1A-0003]") into markdown links
+ * "[1](#src-NVDA-2025-7-0012)" that the answer renderer turns into chips. Ids in a valid
+ * format that were never retrieved become "#unverified-<id>" markers rather than vanishing.
+ * Brackets that are not purely ids ("[1]", "[note]") are left as written.
  */
-export function linkCitations(answer: string, citations: Citation[]) {
-  const known = new Set(citations.map((c) => c.chunk_id));
+export function linkCitations(answer: string, citations: Citation[]): LinkedAnswer {
+  const byId = new Map(citations.map((c) => [c.chunk_id, c]));
   const order: string[] = [];
-  const text = answer.replace(/\[([A-Z.\-]+-\d{4}-\d{1,2}[A-C]?-\d{4})\]/g, (match, id: string) => {
-    if (!known.has(id)) return "";
-    if (!order.includes(id)) order.push(id);
-    return `[${order.indexOf(id) + 1}](#src-${id})`;
+  const text = answer.replace(/\[([^\]]+)\]/g, (match, inner: string) => {
+    const ids = inner.split(/[,;\s]+/).filter(Boolean);
+    if (ids.length === 0 || !ids.every((id) => CHUNK_ID.test(id))) return match;
+    return ids
+      .map((id) => {
+        if (!byId.has(id)) return `[unverified](${UNVERIFIED_HREF_PREFIX}${id})`;
+        if (!order.includes(id)) order.push(id);
+        return `[${order.indexOf(id) + 1}](#src-${id})`;
+      })
+      .join("");
   });
-  const ordered = order.map((id) => citations.find((c) => c.chunk_id === id)!);
+  const ordered = order.map((id) => byId.get(id)!);
   return { text, ordered };
+}
+
+// Answers are immutable once streamed, so the run card and the evidence panel share one result.
+const linkedAnswers = new WeakMap<AnswerEvent, LinkedAnswer>();
+
+export function linkAnswer(answer: AnswerEvent): LinkedAnswer {
+  let linked = linkedAnswers.get(answer);
+  if (!linked) {
+    linked = linkCitations(answer.answer, answer.citations);
+    linkedAnswers.set(answer, linked);
+  }
+  return linked;
 }

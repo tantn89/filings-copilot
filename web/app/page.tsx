@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "@/components/copilot.module.css";
-import { EvidencePanel, type EvidenceTab } from "@/components/evidence-panel";
+import { EvidencePanel, type EvidenceTab, type SourceFocus } from "@/components/evidence-panel";
 import { QuestionComposer } from "@/components/question-composer";
 import { RunCard } from "@/components/run-card";
 import { fetchCompanies, streamAnswer } from "@/lib/agent-api-client";
@@ -18,6 +18,13 @@ const EXAMPLES = [
 
 const REPO_URL = "https://github.com/tantn89/filings-copilot";
 
+// crypto.randomUUID() exists only in secure contexts, so it throws on a LAN dev URL.
+let runCounter = 0;
+function nextRunId(): string {
+  runCounter += 1;
+  return `run-${Date.now()}-${runCounter}`;
+}
+
 /** Fold one streamed event into the run it belongs to. */
 function applyEvent(run: Run, event: AgentEvent): Run {
   switch (event.type) {
@@ -32,6 +39,8 @@ function applyEvent(run: Run, event: AgentEvent): Run {
       return { ...run, status: "done", answer: event.data };
     case "error":
       return { ...run, status: "error", error: event.data.message };
+    default:
+      return run;
   }
 }
 
@@ -39,16 +48,31 @@ export default function Home() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [tab, setTab] = useState<EvidenceTab>("trace");
-  const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [activeSource, setActiveSource] = useState<SourceFocus | null>(null);
   const [companies, setCompanies] = useState<Company[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Mirrors activeId for stream callbacks, which outlive the render that created them.
+  const activeIdRef = useRef<string | null>(null);
+  const sourceSeq = useRef(0);
 
   useEffect(() => {
     fetchCompanies()
       .then(setCompanies)
       .catch(() => setApiError("The research API is not reachable right now."));
-    return () => abortRef.current?.abort();
+  }, []);
+
+  // Abort the in-flight stream only on a real unmount. StrictMode (dev) runs cleanup and
+  // setup back to back, so the abort is deferred and skipped once the effect is set up again.
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      setTimeout(() => {
+        if (!mountedRef.current) abortRef.current?.abort();
+      }, 0);
+    };
   }, []);
 
   const busy = runs.some((r) => r.status === "running");
@@ -59,8 +83,9 @@ export default function Home() {
   }, []);
 
   const ask = useCallback(async (question: string) => {
-    const id = crypto.randomUUID();
+    const id = nextRunId();
     setRuns((prev) => [{ id, question, status: "running", steps: [] }, ...prev]);
+    activeIdRef.current = id;
     setActiveId(id);
     setTab("trace");
     setActiveSource(null);
@@ -70,16 +95,23 @@ export default function Home() {
     try {
       await streamAnswer(question, (event) => {
         updateRun(id, (run) => applyEvent(run, event));
-        if (event.type === "answer" && event.data.citations.length) setTab("sources");
+        // Jump to Sources only if the user is still looking at this run.
+        if (event.type === "answer" && event.data.citations?.length && activeIdRef.current === id) {
+          setTab("sources");
+        }
       }, controller.signal);
       // A stream that closes without an answer or error event still has to end the run.
       updateRun(id, (run) => run.status === "running"
         ? { ...run, status: "error", error: "The connection closed before an answer arrived." }
         : run);
     } catch (e) {
-      if (controller.signal.aborted) return;
-      const message = e instanceof Error ? e.message : String(e);
-      updateRun(id, (run) => ({ ...run, status: "error", error: message }));
+      const message = controller.signal.aborted
+        ? "Cancelled."
+        : e instanceof Error ? e.message : String(e);
+      // Every run reaches a terminal state; an answer that already arrived is kept.
+      updateRun(id, (run) => run.status === "running" ? { ...run, status: "error", error: message } : run);
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
     }
   }, [updateRun]);
 
@@ -92,9 +124,17 @@ export default function Home() {
     if (q && q.length >= 3) void ask(q.slice(0, 1000));
   }, [ask]);
 
+  const selectRun = useCallback((runId: string) => {
+    if (activeIdRef.current === runId) return;
+    activeIdRef.current = runId;
+    setActiveId(runId);
+    setActiveSource(null);
+  }, []);
+
   const cite = useCallback((chunkId: string) => {
     setTab("sources");
-    setActiveSource(chunkId);
+    sourceSeq.current += 1;
+    setActiveSource({ id: chunkId, seq: sourceSeq.current });
   }, []);
 
   const coverage = companies ? coverageSummary(companies) : "";
@@ -153,12 +193,7 @@ export default function Home() {
             <ol className={styles.runList} aria-label="Questions and answers, newest first">
               {runs.map((run) => (
                 <li key={run.id}>
-                  <RunCard
-                    run={run}
-                    active={run.id === activeId}
-                    onSelect={() => { if (run.id !== activeId) { setActiveId(run.id); setActiveSource(null); } }}
-                    onCite={cite}
-                  />
+                  <RunCard run={run} active={run.id === activeId} onSelect={selectRun} onCite={cite} />
                 </li>
               ))}
             </ol>

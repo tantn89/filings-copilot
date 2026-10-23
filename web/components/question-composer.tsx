@@ -18,7 +18,8 @@ export function QuestionComposer({ busy, onAsk }: Props) {
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) submit(event);
+    // Enter while an IME is composing (CJK, Vietnamese) confirms a candidate, not the question.
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) submit(event);
   }
 
   return (
